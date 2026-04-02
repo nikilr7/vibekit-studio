@@ -21,6 +21,7 @@ import { ThemeSelector } from "../components/ThemeSelector";
 import { LivePreview } from "../components/LivePreview";
 import { SaveStatus } from "../components/SaveStatus";
 import { useSaveManager } from "../hooks/useSaveManager";
+import { showToast } from "../utils/toast";
 import {
   HeroEditor,
   FeaturesEditor,
@@ -136,7 +137,7 @@ export default function PageEditor() {
       setSlug(data.slug);
       setTheme((data.theme as ThemeName) || "minimal");
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to load page"}`);
+      showToast.error(error.message || "Failed to load page");
       navigate("/app");
     } finally {
       setLoading(false);
@@ -180,9 +181,9 @@ export default function PageEditor() {
     try {
       const updated = await pagesAPI.publish(page.id);
       setPage(updated);
-      alert("Success: Page published 🚀");
+      showToast.success("Page published successfully! 🚀");
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to publish page"}`);
+      showToast.error(error.message || "Failed to publish page");
     }
   };
 
@@ -192,9 +193,9 @@ export default function PageEditor() {
     try {
       const updated = await pagesAPI.unpublish(page.id);
       setPage(updated);
-      alert("Success: Page unpublished");
+      showToast.success("Page unpublished successfully!");
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to unpublish page"}`);
+      showToast.error(error.message || "Failed to unpublish page");
     }
   };
 

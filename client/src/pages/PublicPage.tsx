@@ -5,13 +5,12 @@ import type { Page, PageContent } from "../types/page";
 import { applyTheme } from "../theme/themes";
 import { getTheme } from "../theme/utils";
 import { LivePreview } from "../components/LivePreview";
-import { useToast } from "../hooks/useToast";
+import { showToast } from "../utils/toast";
 import "../theme/responsive.css";
 
 export default function PublicPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { success, error: showError } = useToast();
   const [page, setPage] = useState<Page | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -143,14 +142,14 @@ export default function PublicPage() {
 
             if (!response.ok) {
               const errorData = await response.json();
-              showError("Error", errorData.message || "Failed to submit form");
+              showToast.error(errorData.message || "Failed to submit form");
               return false;
             }
 
-            success("Message sent!", "Thank you for reaching out. We'll get back to you soon.");
+            showToast.success("Message sent! Thank you for reaching out. 🙋");
             return true;
           } catch (err: any) {
-            showError("Error", "Failed to submit form. Please try again.");
+            showToast.error("Failed to submit form. Please try again.");
             console.error("Contact form error:", err);
             return false;
           }

@@ -29,6 +29,7 @@ import { PageDetails } from "../components/PageDetails";
 import type { Page } from "../api/pages";
 import { pagesAPI } from "../api/pages";
 import { formatViewCount } from "../utils/formatters";
+import { showToast } from "../utils/toast";
 import "../theme/responsive.css";
 
 export default function Dashboard() {
@@ -48,14 +49,14 @@ export default function Dashboard() {
       const data = await pagesAPI.list();
       setPages(data || []);
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to load pages"}`);
+      showToast.error(error.message || "Failed to load pages");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateSuccess = (pageId: string) => {
-    alert("Success: Page created successfully");
+    showToast.success("Page created successfully! 🎉");
     navigate(`/app/pages/${pageId}`);
   };
 
@@ -63,9 +64,9 @@ export default function Dashboard() {
     try {
       const updated = await pagesAPI.publish(id);
       setPages(pages.map((p) => (p.id === id ? updated : p)));
-      alert("Success: Page published");
+      showToast.success("Page published successfully! 🚀");
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to publish page"}`);
+      showToast.error(error.message || "Failed to publish page");
     }
   };
 
@@ -73,19 +74,19 @@ export default function Dashboard() {
     try {
       const updated = await pagesAPI.unpublish(id);
       setPages(pages.map((p) => (p.id === id ? updated : p)));
-      alert("Success: Page unpublished");
+      showToast.success("Page unpublished successfully!");
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to unpublish page"}`);
+      showToast.error(error.message || "Failed to unpublish page");
     }
   };
 
   const handleDuplicate = async (id: string) => {
     try {
       await pagesAPI.duplicate(id);
-      alert("Success: Page duplicated successfully");
+      showToast.success("Page duplicated successfully! ✨");
       await fetchPages();
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to duplicate page"}`);
+      showToast.error(error.message || "Failed to duplicate page");
     }
   };
 
@@ -94,9 +95,9 @@ export default function Dashboard() {
     try {
       await pagesAPI.delete(id);
       setPages(pages.filter((p) => p.id !== id));
-      alert("Success: Page deleted");
+      showToast.success("Page deleted successfully!");
     } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to delete page"}`);
+      showToast.error(error.message || "Failed to delete page");
     }
   };
 
@@ -298,7 +299,7 @@ export default function Dashboard() {
                           onClick={() => {
                             const url = `${window.location.origin}/p/${page.slug}`;
                             navigator.clipboard.writeText(url);
-                            alert("Page URL copied to clipboard!");
+                            showToast.success("Page URL copied to clipboard! 📋");
                           }}
                           flex={{ base: "1 1 100%", md: "1" }}
                           fontSize={{ base: "xs", md: "sm" }}

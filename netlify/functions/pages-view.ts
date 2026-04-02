@@ -40,11 +40,16 @@ export const handler = async (event: any) => {
     console.log("Page found:", { id: page.id, slug: page.slug, status: page.status, view_count: page.view_count });
 
     // Increment view count
-    console.log("Incrementing view count");
+    console.log("Incrementing view count for page id:", page.id);
     const updateResult = await pool.query(
       `UPDATE pages SET view_count = view_count + 1 WHERE id = $1 RETURNING id, view_count`,
       [page.id]
     );
+
+    if (updateResult.rows.length === 0) {
+      console.error("Update failed - no rows returned");
+      return successResponse({ success: true, message: "View tracked" });
+    }
 
     console.log("Update result:", updateResult.rows[0]);
 

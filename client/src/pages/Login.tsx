@@ -13,6 +13,7 @@ import {
   Separator,
   Field,
 } from "@chakra-ui/react";
+import { showToast } from "../utils/toast";
 
 const DiamondMark = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -33,13 +34,17 @@ export default function Login() {
     return () => clearTimeout(t);
   }, []);
 
-  const showToast = (title: string, description: string) => {
-    alert(`${title}: ${description}`);
+  const showToastMessage = (title: string, description: string) => {
+    if (title === "Missing fields" || title === "Login failed" || title === "Error") {
+      showToast.error(`${title}: ${description}`);
+    } else {
+      showToast.info(`${title}: ${description}`);
+    }
   };
 
   const handleLogin = async () => {
     if (!email || !password) {
-      showToast("Missing fields", "Please fill in all fields");
+      showToastMessage("Missing fields", "Please fill in all fields");
       return;
     }
     setLoading(true);
@@ -56,14 +61,15 @@ export default function Login() {
       if (res.ok && data.token) {
         // Store JWT token in localStorage
         localStorage.setItem("token", data.token);
+        showToast.success("Login successful! Welcome back! 👋");
         // Small delay to ensure state is updated
         setTimeout(() => navigate("/app"), 100);
       } else {
-        showToast("Login failed", data.message || "Invalid credentials");
+        showToastMessage("Login failed", data.message || "Invalid credentials");
       }
     } catch (error) {
       console.error("Login error:", error);
-      showToast("Error", "Something went wrong. Try again.");
+      showToastMessage("Error", "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }

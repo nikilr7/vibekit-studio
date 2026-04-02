@@ -95,7 +95,7 @@ export const handler = async (event: any) => {
     const result = await pool.query(
       `INSERT INTO pages (user_id, title, content, status, theme, slug, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-       RETURNING id, title, slug, status, theme, created_at, updated_at`,
+       RETURNING id, title, slug, status, theme, view_count, created_at, updated_at`,
       [
         userId,
         "Untitled Page",

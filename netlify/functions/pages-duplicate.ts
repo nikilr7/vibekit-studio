@@ -59,7 +59,7 @@ export const handler = async (event: any) => {
     const newPageResult = await pool.query(
       `INSERT INTO pages (title, slug, content, theme, status, user_id, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-       RETURNING id, title, slug, status, created_at`,
+       RETURNING id, title, slug, status, theme, view_count, created_at`,
       [
         `${originalPage.title}-${counter}`,
         newSlug,
@@ -77,6 +77,8 @@ export const handler = async (event: any) => {
       title: newPage.title,
       slug: newPage.slug,
       status: newPage.status,
+      theme: newPage.theme,
+      view_count: newPage.view_count,
       createdAt: newPage.created_at,
       message: "Page duplicated successfully",
     });
