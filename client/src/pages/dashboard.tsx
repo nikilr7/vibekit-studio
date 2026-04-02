@@ -128,14 +128,14 @@ export default function Dashboard() {
                 Create and manage your mini websites
               </Text>
             </VStack>
-            <Button colorScheme="red" size={{ base: "sm", md: "md" }} onClick={handleLogout} whiteSpace="nowrap">
+            <Button colorScheme="gray" size={{ base: "sm", md: "md" }} onClick={handleLogout} whiteSpace="nowrap">
               Logout
             </Button>
           </HStack>
 
           {/* Create Button */}
           <Button
-            colorScheme="purple"
+            colorScheme="blue"
             size={{ base: "md", md: "lg" }}
             onClick={() => setDialogOpen(true)}
             width={{ base: "full", md: "auto" }}
