@@ -10,6 +10,7 @@ export interface Page {
   status: "draft" | "published";
   theme: string;
   slug: string;
+  view_count: number;
   created_at: string;
   updated_at: string;
 }
