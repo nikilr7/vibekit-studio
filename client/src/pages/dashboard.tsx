@@ -12,6 +12,11 @@ import {
   Badge,
   Spinner,
   IconButton,
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogCloseTrigger,
 } from "@chakra-ui/react";
 import {
   MenuContent,
@@ -20,6 +25,7 @@ import {
   MenuTrigger,
 } from "@chakra-ui/react";
 import { CreatePageDialog } from "../components/CreatePageDialog";
+import { PageDetails } from "../components/PageDetails";
 import type { Page } from "../api/pages";
 import { pagesAPI } from "../api/pages";
 import { formatViewCount } from "../utils/formatters";
@@ -29,6 +35,7 @@ export default function Dashboard() {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPage, setSelectedPage] = useState<Page | null>(null);
 
   useEffect(() => {
     fetchPages();
@@ -252,6 +259,16 @@ export default function Dashboard() {
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => setSelectedPage(page)}
+                        flex={1}
+                        h="100%"
+                      >
+                        View Details
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => navigate(`/app/pages/${page.id}`)}
                         flex={1}
                         h="100%"
@@ -348,6 +365,30 @@ export default function Dashboard() {
         onClose={() => setDialogOpen(false)}
         onSuccess={handleCreateSuccess}
       />
+
+      {/* Page Details Modal */}
+      <DialogRoot open={!!selectedPage} onOpenChange={(details: any) => !details.open && setSelectedPage(null)}>
+        <DialogContent maxW="4xl" w="95vw" maxH="90vh" position="fixed" top="50%" left="50%" transform="translate(-50%, -50%)" zIndex={9999}>
+          <DialogHeader pb={2}>
+            <HStack justify="space-between" w="full">
+              <Text fontSize="lg" fontWeight="bold">
+                Page Details
+              </Text>
+              <DialogCloseTrigger />
+            </HStack>
+          </DialogHeader>
+          <DialogBody pb={6} maxH="calc(90vh - 100px)" overflowY="auto">
+            {selectedPage && (
+              <PageDetails
+                page={selectedPage}
+                onViewPublic={() => {
+                  window.open(`/p/${selectedPage.slug}`, '_blank');
+                }}
+              />
+            )}
+          </DialogBody>
+        </DialogContent>
+      </DialogRoot>
     </Box>
   );
 }

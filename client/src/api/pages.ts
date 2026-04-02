@@ -23,6 +23,14 @@ export interface CreatePageResponse {
   theme: string;
 }
 
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
+}
+
 function getAuthHeaders() {
   const token = localStorage.getItem("token");
   return {
@@ -187,5 +195,16 @@ export const pagesAPI = {
       body: JSON.stringify({ id }),
     });
     return handleResponse(response);
+  },
+
+  async getSubmissions(pageId: string): Promise<ContactSubmission[]> {
+    const response = await fetch(
+      `${API_BASE}/pages-submissions?pageId=${pageId}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    const data = await handleResponse(response);
+    return data.submissions || [];
   },
 };
