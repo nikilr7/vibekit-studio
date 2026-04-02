@@ -13,6 +13,7 @@ import {
   Separator,
   Field,
 } from "@chakra-ui/react";
+import { showToast } from "../utils/toast";
 
 const DiamondMark = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -81,21 +82,25 @@ export default function Signup() {
     return () => clearTimeout(t);
   }, []);
 
-  const showToast = (title: string, description: string) => {
-    alert(`${title}: ${description}`);
+  const showToastMessage = (title: string, description: string) => {
+    if (title === "Missing fields" || title === "Password mismatch" || title === "Password too short" || title === "Signup failed" || title === "Error") {
+      showToast.error(`${title}: ${description}`);
+    } else {
+      showToast.info(`${title}: ${description}`);
+    }
   };
 
   const handleSignup = async () => {
     if (!email || !password || !confirmPassword) {
-      showToast("Missing fields", "Please fill in all fields");
+      showToastMessage("Missing fields", "Please fill in all fields");
       return;
     }
     if (password !== confirmPassword) {
-      showToast("Password mismatch", "Passwords do not match");
+      showToastMessage("Password mismatch", "Passwords do not match");
       return;
     }
     if (password.length < 6) {
-      showToast("Password too short", "Password must be at least 6 characters");
+      showToastMessage("Password too short", "Password must be at least 6 characters");
       return;
     }
 
@@ -108,13 +113,13 @@ export default function Signup() {
       });
       const data = await res.json();
       if (res.ok) {
-        showToast("Account created", "Redirecting to login…");
+        showToast.success("Account created successfully! Redirecting to login... 🎉");
         setTimeout(() => navigate("/"), 1500);
       } else {
-        showToast("Signup failed", data.message || "Something went wrong");
+        showToastMessage("Signup failed", data.message || "Something went wrong");
       }
     } catch {
-      showToast("Error", "Something went wrong. Try again.");
+      showToastMessage("Error", "Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }

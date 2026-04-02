@@ -17,28 +17,32 @@ export function HeroEditor({ content, onChange }: SectionEditorsProps) {
 
   return (
     <VStack gap={4} align="stretch">
-      <Text fontWeight="bold" fontSize="lg">
+      <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }}>
         Hero Section
       </Text>
       <Input
         placeholder="Title"
         value={content.hero.title}
         onChange={(e) => updateHero("title", e.target.value)}
+        size={{ base: "md", md: "lg" }}
       />
       <Input
         placeholder="Subtitle"
         value={content.hero.subtitle}
         onChange={(e) => updateHero("subtitle", e.target.value)}
+        size={{ base: "md", md: "lg" }}
       />
       <Input
         placeholder="Button Text"
         value={content.hero.buttonText}
         onChange={(e) => updateHero("buttonText", e.target.value)}
+        size={{ base: "md", md: "lg" }}
       />
       <Input
         placeholder="Button URL"
         value={content.hero.buttonUrl}
         onChange={(e) => updateHero("buttonUrl", e.target.value)}
+        size={{ base: "md", md: "lg" }}
       />
     </VStack>
   );
@@ -74,22 +78,22 @@ export function FeaturesEditor({ content, onChange }: SectionEditorsProps) {
 
   return (
     <VStack gap={4} align="stretch">
-      <HStack justify="space-between">
-        <Text fontWeight="bold" fontSize="lg">
+      <HStack justify="space-between" flexWrap={{ base: "wrap", md: "nowrap" }}>
+        <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }}>
           Features
         </Text>
-        <Button size="sm" colorScheme="purple" onClick={addFeature}>
+        <Button size={{ base: "sm", md: "md" }} colorScheme="purple" onClick={addFeature}>
           + Add Feature
         </Button>
       </HStack>
       {content.features.items.map((feature, idx) => (
-        <Box key={idx} p={4} border="1px solid" borderColor="gray.200" borderRadius="md">
-          <HStack justify="space-between" mb={2}>
-            <Text fontSize="sm" fontWeight="bold">
+        <Box key={idx} p={{ base: 3, md: 4 }} border="1px solid" borderColor="gray.200" borderRadius="md">
+          <HStack justify="space-between" mb={2} flexWrap={{ base: "wrap", md: "nowrap" }}>
+            <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="bold">
               Feature {idx + 1}
             </Text>
             <IconButton
-              size="sm"
+              size={{ base: "xs", md: "sm" }}
               colorScheme="red"
               variant="ghost"
               aria-label="Delete"
@@ -103,13 +107,13 @@ export function FeaturesEditor({ content, onChange }: SectionEditorsProps) {
               placeholder="Title"
               value={feature.title}
               onChange={(e) => updateFeature(idx, "title", e.target.value)}
-              size="sm"
+              size={{ base: "sm", md: "md" }}
             />
             <Input
               placeholder="Description"
               value={feature.description}
               onChange={(e) => updateFeature(idx, "description", e.target.value)}
-              size="sm"
+              size={{ base: "sm", md: "md" }}
             />
           </VStack>
         </Box>
@@ -139,7 +143,6 @@ export function GalleryEditor({ content, onChange }: SectionEditorsProps) {
     const images = [...content.gallery.images];
     images[idx] = value;
     
-    // Validate URL
     const error = validateUrl(value);
     setUrlErrors(prev => ({
       ...prev,
@@ -172,22 +175,22 @@ export function GalleryEditor({ content, onChange }: SectionEditorsProps) {
 
   return (
     <VStack gap={4} align="stretch">
-      <HStack justify="space-between">
-        <Text fontWeight="bold" fontSize="lg">
+      <HStack justify="space-between" flexWrap={{ base: "wrap", md: "nowrap" }}>
+        <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }}>
           Gallery
         </Text>
-        <Button size="sm" colorScheme="purple" onClick={addImage}>
+        <Button size={{ base: "sm", md: "md" }} colorScheme="purple" onClick={addImage}>
           + Add Image
         </Button>
       </HStack>
       {content.gallery.images.map((image, idx) => (
-        <Box key={idx} p={4} border="1px solid" borderColor="gray.200" borderRadius="md">
-          <HStack justify="space-between" mb={2}>
-            <Text fontSize="sm" fontWeight="bold">
+        <Box key={idx} p={{ base: 3, md: 4 }} border="1px solid" borderColor="gray.200" borderRadius="md">
+          <HStack justify="space-between" mb={2} flexWrap={{ base: "wrap", md: "nowrap" }}>
+            <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="bold">
               Image {idx + 1}
             </Text>
             <IconButton
-              size="sm"
+              size={{ base: "xs", md: "sm" }}
               colorScheme="red"
               variant="ghost"
               aria-label="Delete"
@@ -201,11 +204,11 @@ export function GalleryEditor({ content, onChange }: SectionEditorsProps) {
               placeholder="Image URL (e.g., https://example.com/image.jpg)"
               value={image}
               onChange={(e) => updateImage(idx, e.target.value)}
-              size="sm"
+              size={{ base: "sm", md: "md" }}
               borderColor={urlErrors[idx] ? "red.300" : "gray.200"}
             />
             {urlErrors[idx] && (
-              <Text color="red.500" fontSize="xs">
+              <Text color="red.500" fontSize={{ base: "xs", md: "sm" }}>
                 {urlErrors[idx]}
               </Text>
             )}
@@ -269,12 +272,12 @@ export function ContactEditor({ content, onChange }: SectionEditorsProps) {
 
   return (
     <VStack gap={4} align="stretch">
-      <HStack justify="space-between">
-        <Text fontWeight="bold" fontSize="lg">
+      <HStack justify="space-between" flexWrap={{ base: "wrap", md: "nowrap" }}>
+        <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }}>
           Contact Section
         </Text>
         <Button
-          size="sm"
+          size={{ base: "sm", md: "md" }}
           colorScheme={content.contact.enabled ? "green" : "gray"}
           onClick={toggleEnabled}
         >
@@ -288,27 +291,27 @@ export function ContactEditor({ content, onChange }: SectionEditorsProps) {
               type="checkbox"
               checked={content.contact.fields.name}
               onChange={() => toggleField("name")}
-              style={{ width: "auto", cursor: "pointer" }}
+              style={{ width: "auto", cursor: "pointer", minWidth: "44px", minHeight: "44px" }}
             />
-            <Text>Name Field</Text>
+            <Text fontSize={{ base: "sm", md: "base" }}>Name Field</Text>
           </HStack>
           <HStack>
             <input
               type="checkbox"
               checked={content.contact.fields.email}
               onChange={() => toggleField("email")}
-              style={{ width: "auto", cursor: "pointer" }}
+              style={{ width: "auto", cursor: "pointer", minWidth: "44px", minHeight: "44px" }}
             />
-            <Text>Email Field</Text>
+            <Text fontSize={{ base: "sm", md: "base" }}>Email Field</Text>
           </HStack>
           <HStack>
             <input
               type="checkbox"
               checked={content.contact.fields.message}
               onChange={() => toggleField("message")}
-              style={{ width: "auto", cursor: "pointer" }}
+              style={{ width: "auto", cursor: "pointer", minWidth: "44px", minHeight: "44px" }}
             />
-            <Text>Message Field</Text>
+            <Text fontSize={{ base: "sm", md: "base" }}>Message Field</Text>
           </HStack>
         </VStack>
       )}

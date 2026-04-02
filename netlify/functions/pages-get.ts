@@ -14,7 +14,7 @@ export const handler = async (event: any) => {
     }
 
     const result = await pool.query(
-      `SELECT id, user_id, title, content, status, slug, created_at, updated_at
+      `SELECT id, user_id, title, content, status, theme, slug, view_count, created_at, updated_at
        FROM pages WHERE id = $1 AND user_id = $2`,
       [id, userId]
     );

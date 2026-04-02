@@ -1,5 +1,5 @@
 import pool from "./db";
-import { errorResponse, successResponse } from "./auth";
+import { errorResponse, successResponse, verifyToken } from "./auth";
 
 export const handler = async (event: any) => {
   try {
@@ -7,24 +7,23 @@ export const handler = async (event: any) => {
       return errorResponse(405, "Method not allowed");
     }
 
-    const pageId = event.pathParameters?.id;
-    const token = event.headers.authorization?.split(" ")[1];
-
-    if (!pageId || !token) {
-      return errorResponse(400, "Page ID and authorization required");
+    // Get pageId from body (sent by frontend)
+    let body: any = {};
+    if (event.body) {
+      body = typeof event.body === "string" ? JSON.parse(event.body) : event.body;
     }
 
-    // Verify user
-    const userResult = await pool.query(
-      "SELECT id FROM users WHERE token = $1",
-      [token]
-    );
+    const pageId = body.id || event.pathParameters?.id;
 
-    if (userResult.rows.length === 0) {
+    if (!pageId) {
+      return errorResponse(400, "Page ID required");
+    }
+
+    // Verify user with JWT token
+    const userId = verifyToken(event);
+    if (!userId) {
       return errorResponse(401, "Unauthorized");
     }
-
-    const userId = userResult.rows[0].id;
 
     // Get original page
     const pageResult = await pool.query(
@@ -38,8 +37,8 @@ export const handler = async (event: any) => {
 
     const originalPage = pageResult.rows[0];
 
-    // Generate unique slug
-    let newSlug = `${originalPage.slug}-copy`;
+    // Generate unique slug with numbering
+    let newSlug = `${originalPage.slug}-1`;
     let counter = 1;
     let slugExists = true;
 
@@ -52,17 +51,17 @@ export const handler = async (event: any) => {
         slugExists = false;
       } else {
         counter++;
-        newSlug = `${originalPage.slug}-copy-${counter}`;
+        newSlug = `${originalPage.slug}-${counter}`;
       }
     }
 
-    // Create new page
+    // Create new page with numbered title
     const newPageResult = await pool.query(
       `INSERT INTO pages (title, slug, content, theme, status, user_id, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-       RETURNING id, title, slug, status, created_at`,
+       RETURNING id, title, slug, status, theme, view_count, created_at`,
       [
-        `Copy of ${originalPage.title}`,
+        `${originalPage.title}-${counter}`,
         newSlug,
         originalPage.content,
         originalPage.theme,
@@ -78,6 +77,8 @@ export const handler = async (event: any) => {
       title: newPage.title,
       slug: newPage.slug,
       status: newPage.status,
+      theme: newPage.theme,
+      view_count: newPage.view_count,
       createdAt: newPage.created_at,
       message: "Page duplicated successfully",
     });

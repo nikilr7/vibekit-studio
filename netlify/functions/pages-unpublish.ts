@@ -55,7 +55,7 @@ export const handler = async (event: any) => {
     const result = await pool.query(
       `UPDATE pages SET status = 'draft', updated_at = NOW()
        WHERE id = $1 AND user_id = $2
-       RETURNING id, user_id, title, content, status, theme, slug, created_at, updated_at`,
+       RETURNING id, user_id, title, content, status, theme, slug, view_count, created_at, updated_at`,
       [id, userId]
     );
 

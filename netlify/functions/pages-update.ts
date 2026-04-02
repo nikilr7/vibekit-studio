@@ -85,7 +85,7 @@ export const handler = async (event: any) => {
       UPDATE pages 
       SET ${updates.join(", ")}
       WHERE id = $${paramCount} AND user_id = $${paramCount + 1}
-      RETURNING id, user_id, title, content, status, theme, slug, created_at, updated_at
+      RETURNING id, user_id, title, content, status, theme, slug, view_count, created_at, updated_at
     `;
 
     console.log("Update query:", query);

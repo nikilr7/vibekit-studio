@@ -1,5 +1,5 @@
 import pool from "./db";
-import { errorResponse, successResponse } from "./auth";
+import { errorResponse, successResponse, verifyToken } from "./auth";
 
 export const handler = async (event: any) => {
   try {
@@ -7,24 +7,23 @@ export const handler = async (event: any) => {
       return errorResponse(405, "Method not allowed");
     }
 
-    const pageId = event.pathParameters?.id;
-    const token = event.headers.authorization?.split(" ")[1];
-
-    if (!pageId || !token) {
-      return errorResponse(400, "Page ID and authorization required");
+    // Get pageId from body (sent by frontend)
+    let body: any = {};
+    if (event.body) {
+      body = typeof event.body === "string" ? JSON.parse(event.body) : event.body;
     }
 
-    // Verify user
-    const userResult = await pool.query(
-      "SELECT id FROM users WHERE token = $1",
-      [token]
-    );
+    const pageId = body.id || event.pathParameters?.id;
 
-    if (userResult.rows.length === 0) {
+    if (!pageId) {
+      return errorResponse(400, "Page ID required");
+    }
+
+    // Verify user with JWT token
+    const userId = verifyToken(event);
+    if (!userId) {
       return errorResponse(401, "Unauthorized");
     }
-
-    const userId = userResult.rows[0].id;
 
     // Verify page belongs to user
     const pageResult = await pool.query(

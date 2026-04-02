@@ -42,11 +42,12 @@ export function LivePreview({
       borderRadius="lg"
       overflow="hidden"
       boxShadow="lg"
+      className="fade-in"
     >
       <VStack gap={0} align="stretch">
         {/* Hero Section */}
         <Box
-          className="hero-section"
+          className="hero-section fade-in-down"
           style={{
             backgroundColor: theme.colors.primary,
             color: theme.colors.secondary,
@@ -56,9 +57,9 @@ export function LivePreview({
         >
           <Text
             as="h1"
-            fontSize={theme.typography.headingSize}
+            fontSize={{ base: "1.75rem", md: "2.5rem", lg: theme.typography.headingSize }}
             fontWeight={theme.typography.fontWeight}
-            mb={4}
+            mb={{ base: 3, md: 4 }}
             style={{
               fontFamily: theme.typography.fontFamily,
               color: theme.colors.secondary,
@@ -67,8 +68,8 @@ export function LivePreview({
             {content.hero.title}
           </Text>
           <Text
-            fontSize="lg"
-            mb={8}
+            fontSize={{ base: "sm", md: "md", lg: "lg" }}
+            mb={{ base: 6, md: 8 }}
             style={{
               color: theme.colors.accent,
               fontFamily: theme.typography.fontFamily,
@@ -77,7 +78,7 @@ export function LivePreview({
             {content.hero.subtitle}
           </Text>
           <Button
-            className={`btn btn-${theme.ui.buttonStyle}`}
+            className="btn btn-solid transition-smooth"
             style={{
               backgroundColor: theme.colors.accent,
               color: theme.colors.primary,
@@ -88,6 +89,7 @@ export function LivePreview({
               cursor: "pointer",
               border: "none",
               transition: "all 250ms ease-in-out",
+              minHeight: "44px",
             }}
           >
             {content.hero.buttonText}
@@ -123,12 +125,12 @@ export function LivePreview({
                 md: "repeat(2, 1fr)",
                 lg: "repeat(3, 1fr)",
               }}
-              gap={8}
+              gap={{ base: 4, md: 6, lg: 8 }}
             >
               {content.features.items.map((feature, idx) => (
                 <Box
                   key={idx}
-                  className="card fade-in-up"
+                  className="card fade-in-up transition-smooth"
                   style={{
                     backgroundColor: theme.colors.surface,
                     border: `1px solid ${theme.colors.border}`,
@@ -139,7 +141,7 @@ export function LivePreview({
                 >
                   <Text
                     as="h3"
-                    fontSize="lg"
+                    fontSize={{ base: "md", md: "lg", lg: "lg" }}
                     fontWeight="bold"
                     mb={2}
                     style={{
@@ -150,6 +152,7 @@ export function LivePreview({
                     {feature.title}
                   </Text>
                   <Text
+                    fontSize={{ base: "sm", md: "base", lg: "base" }}
                     style={{
                       color: theme.colors.textLight,
                       fontFamily: theme.typography.fontFamily,
@@ -193,7 +196,7 @@ export function LivePreview({
                 md: "repeat(2, 1fr)",
                 lg: "repeat(3, 1fr)",
               }}
-              gap={6}
+              gap={{ base: 4, md: 6, lg: 8 }}
             >
               {content.gallery.images.map((image, idx) => (
                 <GalleryImage
@@ -277,6 +280,11 @@ function GalleryImage({
       justifyContent="center"
       position="relative"
       border={`1px solid ${borderColor}`}
+      className="transition-smooth"
+      _hover={{
+        transform: "scale(1.05)",
+        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+      }}
     >
       {imageError ? (
         <VStack gap={2} color="gray.500" textAlign="center" p={4}>
@@ -411,11 +419,13 @@ function ContactForm({
 
   return (
     <VStack
-      gap={4}
+      gap={{ base: 3, md: 4 }}
       maxW="500px"
       mx="auto"
       as="form"
       onSubmit={handleSubmit}
+      w="full"
+      px={{ base: 4, md: 0 }}
     >
       {content.contact.fields.name && (
         <Input
@@ -423,7 +433,7 @@ function ContactForm({
           placeholder="Your Name"
           value={formData.name}
           onChange={handleChange}
-          className="form-input"
+          className="form-input input-responsive transition-smooth"
           style={{
             borderColor: theme.colors.border,
             color: theme.colors.text,
@@ -432,6 +442,7 @@ function ContactForm({
             backgroundColor: theme.colors.background,
             padding: "8px 12px",
             border: `1px solid ${theme.colors.border}`,
+            minHeight: "44px",
           }}
           disabled={isSubmitting}
         />
@@ -443,7 +454,7 @@ function ContactForm({
           type="email"
           value={formData.email}
           onChange={handleChange}
-          className="form-input"
+          className="form-input input-responsive transition-smooth"
           style={{
             borderColor: theme.colors.border,
             color: theme.colors.text,
@@ -452,6 +463,7 @@ function ContactForm({
             backgroundColor: theme.colors.background,
             padding: "8px 12px",
             border: `1px solid ${theme.colors.border}`,
+            minHeight: "44px",
           }}
           disabled={isSubmitting}
         />
@@ -464,7 +476,7 @@ function ContactForm({
           minH="120px"
           value={formData.message}
           onChange={handleChange}
-          className="form-textarea"
+          className="form-textarea input-responsive transition-smooth"
           style={{
             borderColor: theme.colors.border,
             color: theme.colors.text,
@@ -473,6 +485,7 @@ function ContactForm({
             backgroundColor: theme.colors.background,
             padding: "8px 12px",
             border: `1px solid ${theme.colors.border}`,
+            minHeight: "120px",
           }}
           disabled={isSubmitting}
         />
@@ -484,7 +497,7 @@ function ContactForm({
       )}
       <Button
         width="full"
-        className={`btn btn-${theme.ui.buttonStyle}`}
+        className="btn btn-solid btn-responsive transition-smooth"
         style={{
           backgroundColor: theme.colors.accent,
           color: theme.colors.primary,
@@ -496,6 +509,7 @@ function ContactForm({
           border: "none",
           transition: "all 250ms ease-in-out",
           opacity: isSubmitting ? 0.7 : 1,
+          minHeight: "44px",
         }}
         type="submit"
         disabled={isSubmitting}

@@ -54,29 +54,29 @@ export function PageDetails({ page, onViewPublic }: PageDetailsProps) {
         </HStack>
       </VStack>
 
-      <Box w="full" h="1px" bg="gray.200" />
+      <Box w="full" h="1px" bg="rgba(255,255,255,0.1)" />
 
       {/* Tabs */}
       <Tabs.Root value={activeTab} onValueChange={(e) => setActiveTab(e.value)} w="full">
-        <Tabs.List w="full">
-          <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
-          <Tabs.Trigger value="messages">Messages</Tabs.Trigger>
+        <Tabs.List w="full" style={{ borderBottomColor: "rgba(255,255,255,0.1)" }}>
+          <Tabs.Trigger value="overview" style={{ color: "rgba(255,255,255,0.7)" }}>Overview</Tabs.Trigger>
+          <Tabs.Trigger value="messages" style={{ color: "rgba(255,255,255,0.7)" }}>Messages</Tabs.Trigger>
         </Tabs.List>
 
         <Tabs.Content value="overview" w="full">
           <VStack gap={4} align="start" w="full" pt={4}>
             <Box>
-              <Text fontSize="sm" color="gray.600" mb={1}>
+              <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.5)" }} mb={1}>
                 Page URL
               </Text>
               <HStack
-                bg="gray.50"
                 p={3}
                 borderRadius="md"
                 border="1px solid"
-                borderColor="gray.200"
+                borderColor="rgba(255,255,255,0.1)"
+                bg="rgba(255,255,255,0.02)"
               >
-                <Text fontSize="sm" fontFamily="mono" flex={1}>
+                <Text fontSize="sm" fontFamily="mono" flex={1} style={{ color: "#a5b4fc" }}>
                   {window.location.origin}/p/{page.slug}
                 </Text>
                 <Button
@@ -87,6 +87,7 @@ export function PageDetails({ page, onViewPublic }: PageDetailsProps) {
                       `${window.location.origin}/p/${page.slug}`
                     );
                   }}
+                  style={{ color: "rgba(255,255,255,0.7)" }}
                 >
                   Copy
                 </Button>
@@ -94,37 +95,37 @@ export function PageDetails({ page, onViewPublic }: PageDetailsProps) {
             </Box>
 
             <Box>
-              <Text fontSize="sm" color="gray.600" mb={1}>
+              <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.5)" }} mb={1}>
                 Theme
               </Text>
-              <Text fontSize="sm" fontWeight="500" textTransform="capitalize">
+              <Text fontSize="sm" fontWeight="500" textTransform="capitalize" style={{ color: "rgba(255,255,255,0.9)" }}>
                 {page.theme}
               </Text>
             </Box>
 
             {page.status === "published" && (
               <Box>
-                <Text fontSize="sm" color="gray.600" mb={1}>
+                <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.5)" }} mb={1}>
                   Views
                 </Text>
-                <Text fontSize="lg" fontWeight="bold">
+                <Text fontSize="lg" fontWeight="bold" style={{ color: "rgba(255,255,255,0.9)" }}>
                   {formatViewCount(page.view_count || 0)}
                 </Text>
               </Box>
             )}
 
             <Box>
-              <Text fontSize="sm" color="gray.600" mb={1}>
+              <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.5)" }} mb={1}>
                 Created
               </Text>
-              <Text fontSize="sm">{formatDate(page.created_at)}</Text>
+              <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.7)" }}>{formatDate(page.created_at)}</Text>
             </Box>
 
             <Box>
-              <Text fontSize="sm" color="gray.600" mb={1}>
+              <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.5)" }} mb={1}>
                 Last Updated
               </Text>
-              <Text fontSize="sm">{formatDate(page.updated_at)}</Text>
+              <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.7)" }}>{formatDate(page.updated_at)}</Text>
             </Box>
 
             {page.status === "published" && (
@@ -141,10 +142,10 @@ export function PageDetails({ page, onViewPublic }: PageDetailsProps) {
               <Messages pageId={page.id} />
             ) : (
               <Box textAlign="center" py={12}>
-                <Text color="gray.500" mb={2}>
+                <Text style={{ color: "rgba(255,255,255,0.5)" }} mb={2}>
                   Messages are only available for published pages
                 </Text>
-                <Text fontSize="sm" color="gray.400">
+                <Text fontSize="sm" style={{ color: "rgba(255,255,255,0.35)" }}>
                   Publish your page to start receiving messages
                 </Text>
               </Box>
