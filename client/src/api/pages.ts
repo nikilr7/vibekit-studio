@@ -10,6 +10,7 @@ export interface Page {
   status: "draft" | "published";
   theme: string;
   slug: string;
+  view_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -20,6 +21,14 @@ export interface CreatePageResponse {
   slug: string;
   status: string;
   theme: string;
+}
+
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
 }
 
 function getAuthHeaders() {
@@ -186,5 +195,16 @@ export const pagesAPI = {
       body: JSON.stringify({ id }),
     });
     return handleResponse(response);
+  },
+
+  async getSubmissions(pageId: string): Promise<ContactSubmission[]> {
+    const response = await fetch(
+      `${API_BASE}/pages-submissions?pageId=${pageId}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    const data = await handleResponse(response);
+    return data.submissions || [];
   },
 };

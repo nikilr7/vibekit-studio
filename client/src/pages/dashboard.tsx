@@ -12,6 +12,11 @@ import {
   Badge,
   Spinner,
   IconButton,
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogCloseTrigger,
 } from "@chakra-ui/react";
 import {
   MenuContent,
@@ -20,14 +25,17 @@ import {
   MenuTrigger,
 } from "@chakra-ui/react";
 import { CreatePageDialog } from "../components/CreatePageDialog";
+import { PageDetails } from "../components/PageDetails";
 import type { Page } from "../api/pages";
 import { pagesAPI } from "../api/pages";
+import { formatViewCount } from "../utils/formatters";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPage, setSelectedPage] = useState<Page | null>(null);
 
   useEffect(() => {
     fetchPages();
@@ -170,6 +178,7 @@ export default function Dashboard() {
                 lg: "repeat(3, 1fr)",
               }}
               gap={6}
+              alignItems="start"
             >
               {pages.map((page) => (
                 <Box
@@ -182,6 +191,7 @@ export default function Dashboard() {
                   borderColor="gray.200"
                   transition="all 0.2s"
                   _hover={{ shadow: "md", borderColor: "purple.300" }}
+                  position="relative"
                 >
                   <VStack align="stretch" gap={4}>
                     {/* Title and Status */}
@@ -212,29 +222,56 @@ export default function Dashboard() {
                       </HStack>
                     </VStack>
 
-                    {/* Slug */}
-                    <Box
-                      bg="gray.50"
-                      p={2}
-                      borderRadius="md"
-                      fontSize="xs"
-                      color="gray.600"
-                      overflow="hidden"
-                      textOverflow="ellipsis"
-                      whiteSpace="nowrap"
-                      title={page.slug}
-                    >
-                      /{page.slug}
-                    </Box>
+                    {/* Slug and View Count */}
+                    <VStack align="stretch" gap={2}>
+                      <Box
+                        bg="gray.50"
+                        p={2}
+                        borderRadius="md"
+                        fontSize="xs"
+                        color="gray.600"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                        title={page.slug}
+                      >
+                        /{page.slug}
+                      </Box>
 
-                    {/* Actions */}
-                    <HStack gap={2} justify="space-between" pt={2}>
+                      {/* View Count - Only show for published pages */}
+                      {page.status === "published" && (
+                        <Box
+                          bg="blue.50"
+                          p={2}
+                          borderRadius="md"
+                          fontSize="sm"
+                          color="blue.700"
+                          fontWeight="500"
+                          textAlign="center"
+                        >
+                          👁 {formatViewCount(page.view_count || 0)} views
+                        </Box>
+                      )}
+                    </VStack>
+
+                    {/* Actions - Fixed height to prevent layout shift */}
+                    <HStack gap={2} justify="space-between" pt={2} h="44px">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedPage(page)}
+                        flex={1}
+                        h="100%"
+                      >
+                        View Details
+                      </Button>
+
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => navigate(`/app/pages/${page.id}`)}
                         flex={1}
-                        h="44px"
+                        h="100%"
                       >
                         Edit
                       </Button>
@@ -249,62 +286,70 @@ export default function Dashboard() {
                             navigator.clipboard.writeText(url);
                             alert("Page URL copied to clipboard!");
                           }}
-                          h="44px"
+                          h="100%"
                         >
                           Share
                         </Button>
                       )}
 
-                      <MenuRoot>
-                        <MenuTrigger asChild>
-                          <IconButton
-                            variant="outline"
-                            size="sm"
-                            aria-label="Options"
-                            h="44px"
-                          >
-                            ⋮
-                          </IconButton>
-                        </MenuTrigger>
-                        <MenuContent>
-                          {page.status === "published" && (
-                            <MenuItem
-                              value="view"
-                              onClick={() => window.open(`/p/${page.slug}`, '_blank')}
+                      <Box position="relative" h="100%">
+                        <MenuRoot>
+                          <MenuTrigger asChild>
+                            <IconButton
+                              variant="outline"
+                              size="sm"
+                              aria-label="Options"
+                              h="100%"
                             >
-                              View Public Page
-                            </MenuItem>
-                          )}
-                          {page.status === "draft" ? (
-                            <MenuItem
-                              value="publish"
-                              onClick={() => handlePublish(page.id)}
-                            >
-                              Publish
-                            </MenuItem>
-                          ) : (
-                            <MenuItem
-                              value="unpublish"
-                              onClick={() => handleUnpublish(page.id)}
-                            >
-                              Unpublish
-                            </MenuItem>
-                          )}
-                          <MenuItem
-                            value="duplicate"
-                            onClick={() => handleDuplicate(page.id)}
+                              ⋮
+                            </IconButton>
+                          </MenuTrigger>
+                          <MenuContent
+                            position="absolute"
+                            top="100%"
+                            right={0}
+                            zIndex={10}
+                            minW="200px"
                           >
-                            Duplicate
-                          </MenuItem>
-                          <MenuItem
-                            value="delete"
-                            onClick={() => handleDelete(page.id)}
-                            color="red.600"
-                          >
-                            Delete
-                          </MenuItem>
-                        </MenuContent>
-                      </MenuRoot>
+                            {page.status === "published" && (
+                              <MenuItem
+                                value="view"
+                                onClick={() => window.open(`/p/${page.slug}`, '_blank')}
+                              >
+                                View Public Page
+                              </MenuItem>
+                            )}
+                            {page.status === "draft" ? (
+                              <MenuItem
+                                value="publish"
+                                onClick={() => handlePublish(page.id)}
+                              >
+                                Publish
+                              </MenuItem>
+                            ) : (
+                              <MenuItem
+                                value="unpublish"
+                                onClick={() => handleUnpublish(page.id)}
+                              >
+                                Unpublish
+                              </MenuItem>
+                            )}
+                            <MenuItem
+                              value="duplicate"
+                              onClick={() => handleDuplicate(page.id)}
+                            >
+                              Duplicate
+                            </MenuItem>
+                            <MenuItem
+                              value="delete"
+                              onClick={() => handleDelete(page.id)}
+                              color="red.600"
+                            >
+                              Delete
+                            </MenuItem>
+                          </MenuContent>
+                        </MenuRoot>
+                      </Box>
                     </HStack>
                   </VStack>
                 </Box>
@@ -320,6 +365,30 @@ export default function Dashboard() {
         onClose={() => setDialogOpen(false)}
         onSuccess={handleCreateSuccess}
       />
+
+      {/* Page Details Modal */}
+      <DialogRoot open={!!selectedPage} onOpenChange={(details: any) => !details.open && setSelectedPage(null)}>
+        <DialogContent maxW="4xl" w="95vw" maxH="90vh" position="fixed" top="50%" left="50%" transform="translate(-50%, -50%)" zIndex={9999}>
+          <DialogHeader pb={2}>
+            <HStack justify="space-between" w="full">
+              <Text fontSize="lg" fontWeight="bold">
+                Page Details
+              </Text>
+              <DialogCloseTrigger />
+            </HStack>
+          </DialogHeader>
+          <DialogBody pb={6} maxH="calc(90vh - 100px)" overflowY="auto">
+            {selectedPage && (
+              <PageDetails
+                page={selectedPage}
+                onViewPublic={() => {
+                  window.open(`/p/${selectedPage.slug}`, '_blank');
+                }}
+              />
+            )}
+          </DialogBody>
+        </DialogContent>
+      </DialogRoot>
     </Box>
   );
 }

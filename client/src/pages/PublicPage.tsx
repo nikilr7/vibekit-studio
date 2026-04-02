@@ -67,9 +67,28 @@ export default function PublicPage() {
 
   const trackPageView = async () => {
     try {
-      await fetch(`/api/public/pages/${slug}/view`, {
+      // Check if already viewed in this session
+      const sessionKey = `viewed_${slug}`;
+      const alreadyViewed = sessionStorage.getItem(sessionKey);
+
+      if (alreadyViewed) {
+        console.log("Page already viewed in this session, skipping view tracking");
+        return;
+      }
+
+      console.log("Tracking page view for slug:", slug);
+
+      const response = await fetch(`/api/public/pages/${slug}/view`, {
         method: "POST",
       });
+
+      if (response.ok) {
+        // Mark as viewed in this session
+        sessionStorage.setItem(sessionKey, "true");
+        console.log("View tracked successfully");
+      } else {
+        console.warn("Failed to track view:", response.status);
+      }
     } catch (err) {
       // Silently fail - view tracking is not critical to page display
       console.debug("View tracking failed (non-critical):", err);

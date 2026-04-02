@@ -366,7 +366,34 @@ function ContactForm({
     e.preventDefault();
     setSubmitError(null);
 
-    if (!onSubmit) return;
+    // Validate required fields
+    if (content.contact.fields.name && !formData.name?.trim()) {
+      setSubmitError("Name is required");
+      return;
+    }
+    if (content.contact.fields.email && !formData.email?.trim()) {
+      setSubmitError("Email is required");
+      return;
+    }
+    if (content.contact.fields.message && !formData.message?.trim()) {
+      setSubmitError("Message is required");
+      return;
+    }
+
+    // Validate field lengths
+    if (formData.name && formData.name.trim().length < 2) {
+      setSubmitError("Name must be at least 2 characters");
+      return;
+    }
+    if (formData.message && formData.message.trim().length < 5) {
+      setSubmitError("Message must be at least 5 characters");
+      return;
+    }
+
+    if (!onSubmit) {
+      setSubmitError("Contact form is not configured");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -376,6 +403,7 @@ function ContactForm({
       }
     } catch (err) {
       setSubmitError("Failed to submit form. Please try again.");
+      console.error("Form submission error:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -464,12 +492,14 @@ function ContactForm({
           borderRadius: theme.ui.borderRadius,
           padding: "10px 20px",
           fontWeight: "bold",
-          cursor: "pointer",
+          cursor: isSubmitting ? "not-allowed" : "pointer",
           border: "none",
           transition: "all 250ms ease-in-out",
+          opacity: isSubmitting ? 0.7 : 1,
         }}
         type="submit"
         disabled={isSubmitting}
+        onClick={handleSubmit}
       >
         {isSubmitting ? (
           <>
