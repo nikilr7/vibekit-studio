@@ -1,21 +1,6 @@
 // Production Error Handling & Monitoring Utilities
 // File: netlify/functions/monitoring.ts
-
-import * as Sentry from "@sentry/node";
-
-// Initialize Sentry for error tracking
-if (process.env.SENTRY_DSN) {
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV || "production",
-    tracesSampleRate: 1.0,
-    integrations: [
-      new Sentry.Integrations.Http({ tracing: true }),
-      new Sentry.Integrations.OnUncaughtException(),
-      new Sentry.Integrations.OnUnhandledRejection(),
-    ],
-  });
-}
+// Note: Sentry removed to avoid dependency issues. Use console logging instead.
 
 // Logger utility
 export const logger = {
@@ -27,9 +12,6 @@ export const logger = {
   },
   error: (message: string, error?: any) => {
     console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, error || "");
-    if (process.env.SENTRY_DSN) {
-      Sentry.captureException(error || new Error(message));
-    }
   },
   debug: (message: string, data?: any) => {
     if (process.env.LOG_LEVEL === "debug") {
@@ -41,9 +23,9 @@ export const logger = {
 // Error response formatter
 export const errorResponse = (statusCode: number, message: string, details?: any) => {
   const errorId = `ERR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  
+
   logger.error(message, { statusCode, errorId, details });
-  
+
   return {
     statusCode,
     headers: {
@@ -111,7 +93,7 @@ export const validateRequest = (
 
   try {
     const body = JSON.parse(event.body);
-    
+
     for (const field of requiredFields) {
       if (!body[field]) {
         return { valid: false, error: `Missing required field: ${field}` };
@@ -130,17 +112,17 @@ export const measurePerformance = async (
   fn: () => Promise<any>
 ): Promise<any> => {
   const startTime = Date.now();
-  
+
   try {
     const result = await fn();
     const duration = Date.now() - startTime;
-    
+
     logger.debug(`${name} completed in ${duration}ms`);
-    
+
     if (duration > 5000) {
       logger.warn(`${name} took longer than 5s: ${duration}ms`);
     }
-    
+
     return result;
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -240,12 +222,6 @@ export const setupGracefulShutdown = () => {
         await pool.end();
         logger.info("Database connections closed");
 
-        // Flush Sentry
-        if (process.env.SENTRY_DSN) {
-          await Sentry.close(2000);
-          logger.info("Sentry flushed");
-        }
-
         process.exit(0);
       } catch (error) {
         logger.error("Error during shutdown", error);
@@ -254,6 +230,3 @@ export const setupGracefulShutdown = () => {
     });
   });
 };
-
-// Export Sentry for use in functions
-export { Sentry };
