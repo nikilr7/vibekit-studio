@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -25,6 +25,31 @@ import {
   ContactEditor,
 } from "../components/SectionEditors";
 
+// Custom hook for unsaved changes warning
+function useUnsavedChangesWarning(hasUnsavedChanges: boolean) {
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        return "You have unsaved changes. Are you sure you want to leave?";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  const confirmNavigation = () => {
+    if (hasUnsavedChanges) {
+      return window.confirm("You have unsaved changes. Are you sure you want to leave?");
+    }
+    return true;
+  };
+
+  return confirmNavigation;
+}
+
 type DeviceType = "desktop" | "tablet" | "mobile";
 
 export default function PageEditor() {
@@ -41,6 +66,15 @@ export default function PageEditor() {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
 
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  
+  // Refs for debouncing
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSaveRef = useRef<number>(0);
+
+  // Use unsaved changes warning hook
+  const confirmNavigation = useUnsavedChangesWarning(!saved);
+
   useEffect(() => {
     if (!pageId) {
       navigate("/app");
@@ -54,6 +88,32 @@ export default function PageEditor() {
       applyTheme(THEMES[theme]);
     }
   }, [theme]);
+
+  // Debounced save function
+  const debouncedSave = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      if (!saved && autoSaveEnabled && page && content) {
+        handleSave();
+      }
+    }, 2000); // Auto-save after 2 seconds of inactivity
+  }, [saved, autoSaveEnabled, page, content]);
+
+  // Trigger debounced save when content changes
+  useEffect(() => {
+    if (!saved && autoSaveEnabled) {
+      debouncedSave();
+    }
+    
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [content, title, theme, debouncedSave, saved, autoSaveEnabled]);
 
   const fetchPage = async () => {
     try {
@@ -73,7 +133,14 @@ export default function PageEditor() {
   };
 
   const handleSave = async () => {
-    if (!page || !content) return;
+    if (!page || !content || saving) return;
+    
+    // Prevent multiple simultaneous saves
+    const now = Date.now();
+    if (now - lastSaveRef.current < 1000) {
+      return; // Prevent saves within 1 second of each other
+    }
+    lastSaveRef.current = now;
 
     try {
       setSaving(true);
@@ -93,6 +160,17 @@ export default function PageEditor() {
 
   const handlePublish = async () => {
     if (!page) return;
+
+    // Check for unsaved changes before publishing
+    if (!saved) {
+      const shouldSaveFirst = window.confirm(
+        "You have unsaved changes. Would you like to save them before publishing?"
+      );
+      if (shouldSaveFirst) {
+        await handleSave();
+        if (!saved) return; // If save failed, don't publish
+      }
+    }
 
     try {
       setSaving(true);
@@ -154,15 +232,29 @@ export default function PageEditor() {
                 <Badge colorScheme={page.status === "published" ? "green" : "gray"}>
                   {page.status === "published" ? "Published" : "Draft"}
                 </Badge>
+              <HStack gap={2}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
+                  colorScheme={autoSaveEnabled ? "green" : "gray"}
+                >
+                  Auto-save: {autoSaveEnabled ? "ON" : "OFF"}
+                </Button>
                 <Text fontSize="sm" color="gray.600">
-                  {saved ? "Saved" : "Unsaved changes"}
+                  {saving ? "Saving..." : saved ? "Saved" : "Unsaved changes"}
                 </Text>
+              </HStack>
               </HStack>
             </VStack>
             <HStack gap={2}>
               <Button
                 variant="outline"
-                onClick={() => navigate("/app")}
+                onClick={() => {
+                  if (confirmNavigation()) {
+                    navigate("/app");
+                  }
+                }}
               >
                 Back to Dashboard
               </Button>

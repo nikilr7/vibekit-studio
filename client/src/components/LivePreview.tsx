@@ -1,4 +1,5 @@
 import { Box, VStack, Button, Text, Image, Input } from "@chakra-ui/react";
+import { useState } from "react";
 import type { PageContent } from "../types/page";
 import type { Theme } from "../theme/themes";
 
@@ -142,21 +143,11 @@ export function LivePreview({ content, theme, device }: LivePreviewProps) {
               gap={6}
             >
               {content.gallery.images.map((image, idx) => (
-                <Box
+                <GalleryImage
                   key={idx}
-                  aspectRatio="1"
-                  overflow="hidden"
-                  borderRadius="lg"
-                  bg="gray.200"
-                >
-                  <Image
-                    src={image}
-                    alt={`Gallery ${idx + 1}`}
-                    width="100%"
-                    height="100%"
-                    objectFit="cover"
-                  />
-                </Box>
+                  src={image}
+                  alt={`Gallery ${idx + 1}`}
+                />
               ))}
             </Box>
           </Box>
@@ -175,49 +166,129 @@ export function LivePreview({ content, theme, device }: LivePreviewProps) {
             >
               Get In Touch
             </Text>
-            <VStack
-              gap={4}
-              maxW="500px"
-              mx="auto"
-              as="form"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              {content.contact.fields.name && (
-                <Input
-                  placeholder="Your Name"
-                  borderColor={theme.colors.border}
-                  _focus={{ borderColor: theme.colors.accent }}
-                />
-              )}
-              {content.contact.fields.email && (
-                <Input
-                  placeholder="Your Email"
-                  type="email"
-                  borderColor={theme.colors.border}
-                  _focus={{ borderColor: theme.colors.accent }}
-                />
-              )}
-              {content.contact.fields.message && (
-                <Input
-                  placeholder="Your Message"
-                  as="textarea"
-                  minH="120px"
-                  borderColor={theme.colors.border}
-                  _focus={{ borderColor: theme.colors.accent }}
-                />
-              )}
-              <Button
-                width="full"
-                bg={theme.colors.accent}
-                color={theme.colors.primary}
-                _hover={{ opacity: 0.8 }}
-              >
-                Send Message
-              </Button>
-            </VStack>
+            <ContactForm content={content} theme={theme} />
           </Box>
         )}
       </VStack>
     </Box>
+  );
+}
+
+// Gallery Image component with error handling
+function GalleryImage({ src, alt }: { src: string; alt: string }) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoading(false);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageError(false);
+  };
+
+  return (
+    <Box
+      aspectRatio="1"
+      overflow="hidden"
+      borderRadius="lg"
+      bg="gray.200"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      position="relative"
+    >
+      {imageError ? (
+        <VStack gap={2} color="gray.500" textAlign="center" p={4}>
+          <Text fontSize="2xl">📷</Text>
+          <Text fontSize="sm">Image failed to load</Text>
+        </VStack>
+      ) : (
+        <>
+          {imageLoading && (
+            <Box
+              position="absolute"
+              inset={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              bg="gray.100"
+            >
+              <Text color="gray.500">Loading...</Text>
+            </Box>
+          )}
+          <Image
+            src={src}
+            alt={alt}
+            width="100%"
+            height="100%"
+            objectFit="cover"
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            style={{ opacity: imageLoading ? 0 : 1 }}
+          />
+        </>
+      )}
+    </Box>
+  );
+}
+
+// Contact Form component with conditional rendering
+function ContactForm({ content, theme }: { content: PageContent; theme: Theme }) {
+  const hasAnyField = content.contact.fields.name || content.contact.fields.email || content.contact.fields.message;
+
+  if (!hasAnyField) {
+    return (
+      <Box textAlign="center" py={8}>
+        <Text color={theme.colors.textLight}>
+          Contact form is enabled but no fields are selected.
+        </Text>
+      </Box>
+    );
+  }
+
+  return (
+    <VStack
+      gap={4}
+      maxW="500px"
+      mx="auto"
+      as="form"
+      onSubmit={(e) => e.preventDefault()}
+    >
+      {content.contact.fields.name && (
+        <Input
+          placeholder="Your Name"
+          borderColor={theme.colors.border}
+          _focus={{ borderColor: theme.colors.accent }}
+        />
+      )}
+      {content.contact.fields.email && (
+        <Input
+          placeholder="Your Email"
+          type="email"
+          borderColor={theme.colors.border}
+          _focus={{ borderColor: theme.colors.accent }}
+        />
+      )}
+      {content.contact.fields.message && (
+        <Input
+          placeholder="Your Message"
+          as="textarea"
+          minH="120px"
+          borderColor={theme.colors.border}
+          _focus={{ borderColor: theme.colors.accent }}
+        />
+      )}
+      <Button
+        width="full"
+        bg={theme.colors.accent}
+        color={theme.colors.primary}
+        _hover={{ opacity: 0.8 }}
+      >
+        Send Message
+      </Button>
+    </VStack>
   );
 }

@@ -6,6 +6,7 @@ const Login = lazy(() => import("./pages/Login.tsx"));
 const Signup = lazy(() => import("./pages/Signup.tsx"));
 const Dashboard = lazy(() => import("./pages/dashboard.tsx"));
 const PageEditor = lazy(() => import("./pages/PageEditor.tsx"));
+const PublicPage = lazy(() => import("./pages/PublicPage.tsx"));
 
 function LoadingSpinner() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/p/:slug" element={<PublicPage />} />
           <Route
             path="/app"
             element={
