@@ -504,8 +504,8 @@ export default function Signup() {
               width="full"
               mt="6"
               h="50px"
-              bg="#1c1a16"
-              color="#f2ede4"
+              bg="#2563eb"
+              color="#ffffff"
               borderRadius="10px"
               fontFamily="'Outfit', sans-serif"
               fontSize="15px"
@@ -517,13 +517,13 @@ export default function Signup() {
               loadingText="Creating account…"
               position="relative"
               overflow="hidden"
-              _hover={{ bg: "#2e2b23", transform: "translateY(-1px)" }}
+              _hover={{ bg: "#1d4ed8", transform: "translateY(-1px)" }}
               _active={{ transform: "translateY(0)" }}
               _after={{
                 content: '""',
                 position: "absolute",
                 inset: 0,
-                background: "linear-gradient(135deg, rgba(201,168,76,0.15), transparent 55%)",
+                background: "linear-gradient(135deg, rgba(255,255,255,0.15), transparent 55%)",
                 pointerEvents: "none",
               }}
             >

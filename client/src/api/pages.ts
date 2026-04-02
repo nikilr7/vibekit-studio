@@ -1,10 +1,12 @@
+import type { PageContent } from "../types/page";
+
 const API_BASE = "/.netlify/functions";
 
 export interface Page {
   id: string;
   user_id: string;
   title: string;
-  content: Record<string, any>;
+  content: PageContent;
   status: "draft" | "published";
   theme: string;
   slug: string;
@@ -43,27 +45,27 @@ async function retryRequest<T>(
   delay: number = 1000
 ): Promise<T> {
   let lastError: Error;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await requestFn();
     } catch (error: any) {
       lastError = error;
-      
+
       // Don't retry on client errors (4xx)
-      if (error.message.includes('HTTP 4')) {
+      if (error.message.includes("HTTP 4")) {
         throw error;
       }
-      
+
       if (attempt === maxRetries) {
         throw new Error(`Failed after ${maxRetries} attempts: ${error.message}`);
       }
-      
+
       // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, delay * attempt));
+      await new Promise((resolve) => setTimeout(resolve, delay * attempt));
     }
   }
-  
+
   throw lastError!;
 }
 
@@ -95,34 +97,76 @@ export const pagesAPI = {
 
   async update(id: string, data: Partial<Page>): Promise<Page> {
     return retryRequest(async () => {
+      const payload = { id, ...data };
+      console.log("📤 Sending update request:", payload);
+
       const response = await fetch(`${API_BASE}/pages-update`, {
         method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ id, ...data }),
+        body: JSON.stringify(payload),
       });
-      return handleResponse(response);
+
+      console.log("📥 Response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Error response:", errorData);
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Update successful:", result);
+      return result.page || result;
     });
   },
 
   async publish(id: string): Promise<Page> {
     return retryRequest(async () => {
+      const payload = { id };
+      console.log("📤 Sending publish request:", payload);
+
       const response = await fetch(`${API_BASE}/pages-publish`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ id }),
+        body: JSON.stringify(payload),
       });
-      return handleResponse(response);
+
+      console.log("📥 Response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Error response:", errorData);
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Publish successful:", result);
+      return result.page || result;
     });
   },
 
   async unpublish(id: string): Promise<Page> {
     return retryRequest(async () => {
+      const payload = { id };
+      console.log("📤 Sending unpublish request:", payload);
+
       const response = await fetch(`${API_BASE}/pages-unpublish`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({ id }),
+        body: JSON.stringify(payload),
       });
-      return handleResponse(response);
+
+      console.log("📥 Response status:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Error response:", errorData);
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Unpublish successful:", result);
+      return result.page || result;
     });
   },
 

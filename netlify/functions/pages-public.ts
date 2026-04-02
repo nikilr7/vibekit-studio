@@ -3,13 +3,14 @@ import { errorResponse, successResponse } from "./auth";
 
 export const handler = async (event: any) => {
   try {
-    const slug = event.queryStringParameters?.slug;
+    // Extract slug from path: /p/:slug
+    const slug = event.path?.split("/").pop() || event.queryStringParameters?.slug;
     if (!slug) {
       return errorResponse(400, "Page slug required");
     }
 
     const result = await pool.query(
-      `SELECT id, title, content, theme, slug, created_at, updated_at
+      `SELECT id, title, content, theme, slug, view_count, created_at, updated_at
        FROM pages WHERE slug = $1 AND status = 'published'`,
       [slug]
     );

@@ -41,9 +41,9 @@ export interface Page {
   content: PageContent;
   theme: string;
   status: "draft" | "published";
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const DEFAULT_PAGE_CONTENT: PageContent = {
