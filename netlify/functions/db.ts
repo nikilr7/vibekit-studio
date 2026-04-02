@@ -1,10 +1,18 @@
 import "dotenv/config";
-import { Client } from "pg";
+import { Pool } from "pg";
 
-const client = new Client({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+  max: 1,
+  idleTimeoutMillis: 5000,
+  connectionTimeoutMillis: 5000,
 });
 
-client.connect();
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle client", err);
+});
 
-export default client;
+export default pool;

@@ -1,31 +1,51 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Box, Text, Heading } from "@chakra-ui/react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Box, Spinner } from "@chakra-ui/react";
 
-function Landing() {
-  const [message, setMessage] = useState("");
+const Login = lazy(() => import("./pages/Login.tsx"));
+const Signup = lazy(() => import("./pages/Signup.tsx"));
+const Dashboard = lazy(() => import("./pages/dashboard.tsx"));
+const PageEditor = lazy(() => import("./pages/PageEditor.tsx"));
 
-  useEffect(() => {
-    fetch("/.netlify/functions/hello")
-      .then(res => res.json())
-      .then(data => setMessage(data.message));
-  }, []);
-
+function LoadingSpinner() {
   return (
-    <Box p={4}>
-      <Text>{message}</Text>
+    <Box display="flex" justifyContent="center" alignItems="center" minH="100vh">
+      <Spinner size="lg" color="purple.500" />
     </Box>
   );
+}
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem("token");
+  return token ? <>{children}</> : <Navigate to="/" replace />;
 }
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Heading>Login</Heading>} />
-        <Route path="/app" element={<Heading>Dashboard</Heading>} />
-      </Routes>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/pages/:pageId"
+            element={
+              <ProtectedRoute>
+                <PageEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
