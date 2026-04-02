@@ -6,6 +6,7 @@ import { applyTheme } from "../theme/themes";
 import { getTheme } from "../theme/utils";
 import { LivePreview } from "../components/LivePreview";
 import { useToast } from "../hooks/useToast";
+import "../theme/responsive.css";
 
 export default function PublicPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -98,23 +99,25 @@ export default function PublicPage() {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minH="100vh">
-        <Spinner size="lg" color="purple.500" />
+        <Spinner size={{ base: "lg", md: "xl" }} color="purple.500" />
       </Box>
     );
   }
 
   if (error || !page) {
     return (
-      <Container maxW="md" py={20}>
-        <VStack gap={4} textAlign="center">
-          <Text fontSize="6xl">404</Text>
-          <Text fontSize="xl" fontWeight="bold">
+      <Container maxW="md" py={{ base: 8, md: 12, lg: 20 }} px={{ base: 4, md: 6 }}>
+        <VStack gap={{ base: 3, md: 4 }} textAlign="center">
+          <Text fontSize={{ base: "4xl", md: "6xl" }} fontWeight="bold">
+            404
+          </Text>
+          <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold">
             {error || "Page not found"}
           </Text>
-          <Text color="gray.600">
+          <Text color="gray.600" fontSize={{ base: "sm", md: "base" }}>
             The page you're looking for doesn't exist or hasn't been published yet.
           </Text>
-          <Button colorScheme="blue" onClick={() => navigate("/")}>
+          <Button colorScheme="blue" onClick={() => navigate("/")} size={{ base: "md", md: "lg" }}>
             Go Home
           </Button>
         </VStack>
@@ -156,12 +159,13 @@ export default function PublicPage() {
 
       <Box
         bg="gray.50"
-        py={4}
+        py={{ base: 3, md: 4 }}
         textAlign="center"
         borderTop="1px solid"
         borderColor="gray.200"
+        px={{ base: 4, md: 6 }}
       >
-        <Text fontSize="sm" color="gray.600">
+        <Text fontSize={{ base: "xs", md: "sm" }} color="gray.600">
           Powered by{" "}
           <Text as="span" fontWeight="bold" color="purple.600">
             VibeKit Studio

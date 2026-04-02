@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Box, Spinner } from "@chakra-ui/react";
+import "./theme/responsive-enhanced.css";
 import "./theme/theme.css";
 
 const Login = lazy(() => import("./pages/Login.tsx"));
@@ -11,7 +12,13 @@ const PublicPage = lazy(() => import("./pages/PublicPage.tsx"));
 
 function LoadingSpinner() {
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minH="100vh">
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minH="100vh"
+      bg="gray.50"
+    >
       <Spinner size="lg" color="purple.500" />
     </Box>
   );

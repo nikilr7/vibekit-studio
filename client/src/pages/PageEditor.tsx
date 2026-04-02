@@ -224,25 +224,25 @@ export default function PageEditor() {
   return (
     <Box minH="100vh" bg="gray.50">
       {/* Top Bar */}
-      <Box bg="white" borderBottom="1px solid" borderColor="gray.200" py={4} px={6} boxShadow="sm">
+      <Box bg="white" borderBottom="1px solid" borderColor="gray.200" py={{ base: 3, md: 4 }} px={{ base: 4, md: 6 }} boxShadow="sm">
         <Container maxW="100%" px={0}>
-          <VStack gap={4} align="stretch">
+          <VStack gap={{ base: 3, md: 4 }} align="stretch">
             {/* Row 1: Title and Status */}
-            <HStack justify="space-between" align="start">
-              <VStack align="start" gap={2} flex={1}>
-                <Heading size="md" color="gray.900">
+            <HStack justify="space-between" align="start" flexWrap={{ base: "wrap", md: "nowrap" }} gap={{ base: 2, md: 4 }}>
+              <VStack align="start" gap={2} flex={1} minW={0}>
+                <Heading size={{ base: "sm", md: "md" }} color="gray.900">
                   {title || "Untitled Page"}
                 </Heading>
                 <HStack gap={2} flexWrap="wrap">
                   <Badge 
                     colorScheme={page.status === "published" ? "green" : "gray"}
-                    fontSize="xs"
+                    fontSize={{ base: "xs", md: "sm" }}
                     px={2}
                     py={1}
                   >
                     {page.status === "published" ? "Published" : "Draft"}
                   </Badge>
-                  <Text fontSize="xs" color="gray.500">
+                  <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500">
                     /{slug}
                   </Text>
                 </HStack>
@@ -260,57 +260,66 @@ export default function PageEditor() {
             </HStack>
 
             {/* Row 2: Controls */}
-            <HStack justify="space-between" align="center">
+            <HStack justify="space-between" align="center" flexWrap={{ base: "wrap", md: "nowrap" }} gap={{ base: 2, md: 3 }}>
               <HStack gap={2}>
                 <Button
                   variant={autoSaveEnabled ? "solid" : "outline"}
-                  size="sm"
+                  size={{ base: "sm", md: "md" }}
                   onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
                   colorScheme={autoSaveEnabled ? "blue" : "gray"}
-                  fontSize="xs"
+                  fontSize={{ base: "xs", md: "sm" }}
+                  whiteSpace="nowrap"
                 >
                   Auto-save: {autoSaveEnabled ? "ON" : "OFF"}
                 </Button>
               </HStack>
 
-              <HStack gap={2}>
+              <HStack gap={2} flexWrap={{ base: "wrap", md: "nowrap" }}>
                 <Button
                   variant="outline"
                   colorScheme="gray"
-                  size="sm"
+                  size={{ base: "sm", md: "md" }}
                   onClick={() => {
                     if (confirmNavigation()) {
                       navigate("/app");
                     }
                   }}
+                  fontSize={{ base: "xs", md: "sm" }}
+                  minW={{ base: "auto", md: "80px" }}
                 >
                   Back
                 </Button>
                 <Button
                   colorScheme="blue"
-                  size="sm"
+                  size={{ base: "sm", md: "md" }}
                   onClick={() => saveManager.save()}
                   loading={saveManager.isSaving}
                   disabled={!saveManager.hasUnsavedChanges || saveManager.isSaving}
+                  fontSize={{ base: "xs", md: "sm" }}
+                  minW={{ base: "auto", md: "80px" }}
                 >
                   Save
                 </Button>
                 {page.status === "draft" ? (
                   <Button
                     colorScheme="cyan"
-                    size="sm"
+                    size={{ base: "sm", md: "md" }}
                     onClick={handlePublish}
                     disabled={isPublishDisabled}
                     loading={saveManager.isSaving}
+                    fontSize={{ base: "xs", md: "sm" }}
+                    minW={{ base: "auto", md: "100px" }}
                   >
                     Publish
                   </Button>
                 ) : (
                   <Button
                     colorScheme="orange"
-                    size="sm"
+                    size={{ base: "sm", md: "md" }}
                     onClick={handleUnpublish}
                     loading={saveManager.isSaving}
+                    fontSize={{ base: "xs", md: "sm" }}
+                    minW={{ base: "auto", md: "100px" }}
                   >
                     Unpublish
                   </Button>
@@ -334,19 +343,19 @@ export default function PageEditor() {
             borderRight={{ base: "none", lg: "1px solid" }}
             borderColor="gray.200"
             overflowY="auto"
-            p={6}
+            p={{ base: 4, md: 6 }}
           >
-            <VStack gap={8} align="stretch">
+            <VStack gap={{ base: 6, md: 8 }} align="stretch">
               {/* Page Settings */}
               <VStack gap={4} align="stretch">
-                <Text fontWeight="bold" fontSize="lg" color="gray.900">
+                <Text fontWeight="bold" fontSize={{ base: "md", md: "lg" }} color="gray.900">
                   Page Settings
                 </Text>
                 <Input
                   placeholder="Page Title"
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  size="md"
+                  size={{ base: "md", md: "lg" }}
                   bg="gray.50"
                   borderColor="gray.300"
                   _focus={{
@@ -359,7 +368,7 @@ export default function PageEditor() {
                   placeholder="Slug"
                   value={slug}
                   disabled
-                  fontSize="sm"
+                  fontSize={{ base: "sm", md: "base" }}
                   color="gray.500"
                   bg="gray.100"
                   borderColor="gray.300"
@@ -395,21 +404,22 @@ export default function PageEditor() {
           {/* Right: Preview */}
           <Box
             bg="gray.100"
-            p={6}
+            p={{ base: 4, md: 6 }}
             overflowY="auto"
             display={{ base: "none", lg: "block" }}
           >
             <VStack gap={4} align="stretch">
               {/* Device Toggle */}
-              <HStack gap={2} justify="center">
+              <HStack gap={2} justify="center" flexWrap="wrap">
                 {(["desktop", "tablet", "mobile"] as DeviceType[]).map((d) => (
                   <Button
                     key={d}
-                    size="sm"
+                    size={{ base: "sm", md: "md" }}
                     colorScheme={device === d ? "purple" : "gray"}
                     variant={device === d ? "solid" : "outline"}
                     onClick={() => setDevice(d)}
                     textTransform="capitalize"
+                    fontSize={{ base: "xs", md: "sm" }}
                   >
                     {d}
                   </Button>

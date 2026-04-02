@@ -29,6 +29,7 @@ import { PageDetails } from "../components/PageDetails";
 import type { Page } from "../api/pages";
 import { pagesAPI } from "../api/pages";
 import { formatViewCount } from "../utils/formatters";
+import "../theme/responsive.css";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -115,17 +116,19 @@ export default function Dashboard() {
 
   return (
     <Box minH="100vh" bg="gray.50">
-      <Container maxW="7xl" py={8}>
-        <VStack align="stretch" gap={8}>
+      <Container maxW="7xl" py={{ base: 4, md: 6, lg: 8 }} px={{ base: 4, md: 6 }}>
+        <VStack align="stretch" gap={{ base: 4, md: 6, lg: 8 }}>
           {/* Header */}
-          <HStack justify="space-between" align="center">
-            <VStack align="start" gap={1}>
-              <Heading size="xl">My Pages</Heading>
-              <Text color="gray.600" fontSize="sm">
+          <HStack justify="space-between" align="center" flexWrap={{ base: "wrap", md: "nowrap" }} gap={{ base: 2, md: 4 }}>
+            <VStack align="start" gap={1} flex={1} minW="0">
+              <Heading size={{ base: "lg", md: "xl" }}>
+                My Pages
+              </Heading>
+              <Text color="gray.600" fontSize={{ base: "xs", md: "sm" }}>
                 Create and manage your mini websites
               </Text>
             </VStack>
-            <Button colorScheme="red" size="sm" onClick={handleLogout}>
+            <Button colorScheme="red" size={{ base: "sm", md: "md" }} onClick={handleLogout} whiteSpace="nowrap">
               Logout
             </Button>
           </HStack>
@@ -133,11 +136,11 @@ export default function Dashboard() {
           {/* Create Button */}
           <Button
             colorScheme="purple"
-            size="lg"
+            size={{ base: "md", md: "lg" }}
             onClick={() => setDialogOpen(true)}
-            width={{ base: "full", sm: "auto" }}
-            fontSize={{ base: "md", sm: "lg" }}
-            h={{ base: "44px", sm: "50px" }}
+            width={{ base: "full", md: "auto" }}
+            fontSize={{ base: "sm", md: "md" }}
+            h={{ base: "40px", md: "50px" }}
           >
             + Create New Page
           </Button>
@@ -177,27 +180,31 @@ export default function Dashboard() {
                 md: "repeat(2, 1fr)",
                 lg: "repeat(3, 1fr)",
               }}
-              gap={6}
+              gap={{ base: 4, md: 5, lg: 6 }}
               alignItems="start"
+              w="full"
             >
               {pages.map((page) => (
                 <Box
                   key={page.id}
                   bg="white"
-                  shadow="sm"
-                  borderRadius="lg"
-                  p={6}
+                  shadow={{ base: "sm", md: "md" }}
+                  borderRadius={{ base: "md", md: "lg" }}
+                  p={{ base: 4, md: 5, lg: 6 }}
                   border="1px solid"
                   borderColor="gray.200"
                   transition="all 0.2s"
-                  _hover={{ shadow: "md", borderColor: "purple.300" }}
+                  _hover={{ shadow: "lg", borderColor: "purple.300" }}
                   position="relative"
+                  display="flex"
+                  flexDirection="column"
+                  h="full"
                 >
-                  <VStack align="stretch" gap={4}>
+                  <VStack align="stretch" gap={{ base: 3, md: 4 }} flex={1}>
                     {/* Title and Status */}
-                    <VStack align="stretch" gap={2}>
+                    <VStack align="stretch" gap={1}>
                       <Heading
-                        size="sm"
+                        size={{ base: "sm", md: "md" }}
                         overflow="hidden"
                         textOverflow="ellipsis"
                         whiteSpace="nowrap"
@@ -210,13 +217,13 @@ export default function Dashboard() {
                           colorScheme={
                             page.status === "published" ? "green" : "gray"
                           }
-                          fontSize="xs"
+                          fontSize={{ base: "xs", md: "sm" }}
                         >
                           {page.status === "published"
                             ? "Published"
                             : "Draft"}
                         </Badge>
-                        <Text fontSize="xs" color="gray.500">
+                        <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500">
                           {formatDate(page.created_at)}
                         </Text>
                       </HStack>
@@ -226,9 +233,9 @@ export default function Dashboard() {
                     <VStack align="stretch" gap={2}>
                       <Box
                         bg="gray.50"
-                        p={2}
+                        p={{ base: 2, md: 2.5 }}
                         borderRadius="md"
-                        fontSize="xs"
+                        fontSize={{ base: "xs", md: "sm" }}
                         color="gray.600"
                         overflow="hidden"
                         textOverflow="ellipsis"
@@ -242,9 +249,9 @@ export default function Dashboard() {
                       {page.status === "published" && (
                         <Box
                           bg="blue.50"
-                          p={2}
+                          p={{ base: 2, md: 2.5 }}
                           borderRadius="md"
-                          fontSize="sm"
+                          fontSize={{ base: "xs", md: "sm" }}
                           color="blue.700"
                           fontWeight="500"
                           textAlign="center"
@@ -255,30 +262,37 @@ export default function Dashboard() {
                     </VStack>
 
                     {/* Actions - Fixed height to prevent layout shift */}
-                    <HStack gap={2} justify="space-between" pt={2} h="44px">
+                    <HStack
+                      gap={{ base: 1.5, md: 2 }}
+                      justify="space-between"
+                      pt={{ base: 2, md: 3 }}
+                      mt="auto"
+                      flexWrap={{ base: "wrap", md: "nowrap" }}
+                      w="full"
+                    >
                       <Button
-                        size="sm"
+                        size={{ base: "sm", md: "md" }}
                         variant="outline"
                         onClick={() => setSelectedPage(page)}
-                        flex={1}
-                        h="100%"
+                        flex={{ base: "1 1 calc(50% - 4px)", md: "1" }}
+                        fontSize={{ base: "xs", md: "sm" }}
                       >
                         View Details
                       </Button>
 
                       <Button
-                        size="sm"
+                        size={{ base: "sm", md: "md" }}
                         variant="outline"
                         onClick={() => navigate(`/app/pages/${page.id}`)}
-                        flex={1}
-                        h="100%"
+                        flex={{ base: "1 1 calc(50% - 4px)", md: "1" }}
+                        fontSize={{ base: "xs", md: "sm" }}
                       >
                         Edit
                       </Button>
 
                       {page.status === "published" && (
                         <Button
-                          size="sm"
+                          size={{ base: "sm", md: "md" }}
                           colorScheme="blue"
                           variant="outline"
                           onClick={() => {
@@ -286,20 +300,20 @@ export default function Dashboard() {
                             navigator.clipboard.writeText(url);
                             alert("Page URL copied to clipboard!");
                           }}
-                          h="100%"
+                          flex={{ base: "1 1 100%", md: "1" }}
+                          fontSize={{ base: "xs", md: "sm" }}
                         >
                           Share
                         </Button>
                       )}
 
-                      <Box position="relative" h="100%">
+                      <Box position="relative">
                         <MenuRoot>
                           <MenuTrigger asChild>
                             <IconButton
                               variant="outline"
-                              size="sm"
+                              size={{ base: "sm", md: "md" }}
                               aria-label="Options"
-                              h="100%"
                             >
                               ⋮
                             </IconButton>
