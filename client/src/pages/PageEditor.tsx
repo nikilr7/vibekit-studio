@@ -17,13 +17,41 @@ import type { Page, PageContent } from "../types/page";
 import { pagesAPI } from "../api/pages";
 import { THEMES, applyTheme } from "../theme/themes";
 import type { ThemeName } from "../theme/themes";
+import { ThemeSelector } from "../components/ThemeSelector";
 import { LivePreview } from "../components/LivePreview";
+import { SaveStatus } from "../components/SaveStatus";
+import { useSaveManager } from "../hooks/useSaveManager";
 import {
   HeroEditor,
   FeaturesEditor,
   GalleryEditor,
   ContactEditor,
 } from "../components/SectionEditors";
+
+// Custom hook for unsaved changes warning
+function useUnsavedChangesWarning(hasUnsavedChanges: boolean) {
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        return "You have unsaved changes. Are you sure you want to leave?";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  const confirmNavigation = () => {
+    if (hasUnsavedChanges) {
+      return window.confirm("You have unsaved changes. Are you sure you want to leave?");
+    }
+    return true;
+  };
+
+  return confirmNavigation;
+}
 
 type DeviceType = "desktop" | "tablet" | "mobile";
 
@@ -34,12 +62,48 @@ export default function PageEditor() {
   const [page, setPage] = useState<Page | null>(null);
   const [content, setContent] = useState<PageContent | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(true);
   const [device, setDevice] = useState<DeviceType>("desktop");
   const [theme, setTheme] = useState<ThemeName>("minimal");
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+
+  // Track what needs to be saved
+  const [pendingChanges, setPendingChanges] = useState({
+    title: false,
+    content: false,
+    theme: false,
+  });
+
+  const confirmNavigation = useUnsavedChangesWarning(
+    Object.values(pendingChanges).some((v) => v)
+  );
+
+  // Save manager hook
+  const saveManager = useSaveManager({
+    onSave: async () => {
+      if (!page || !content) return;
+
+      const updates: any = {};
+      if (pendingChanges.title) updates.title = title;
+      if (pendingChanges.content) updates.content = content;
+      if (pendingChanges.theme) updates.theme = theme;
+
+      if (Object.keys(updates).length === 0) return;
+
+      const result = await pagesAPI.update(page.id, updates);
+      setPage(result);
+      setPendingChanges({ title: false, content: false, theme: false });
+    },
+    debounceDelay: 1200,
+    maxRetries: 3,
+    onError: (error) => {
+      console.error("Save failed:", error);
+    },
+    onSuccess: () => {
+      // Optional: Show success toast
+    },
+  });
 
   useEffect(() => {
     if (!pageId) {
@@ -55,11 +119,18 @@ export default function PageEditor() {
     }
   }, [theme]);
 
+  // Trigger auto-save when changes are made
+  useEffect(() => {
+    if (autoSaveEnabled && Object.values(pendingChanges).some((v) => v)) {
+      saveManager.triggerAutoSave();
+    }
+  }, [pendingChanges, autoSaveEnabled, saveManager]);
+
   const fetchPage = async () => {
     try {
       setLoading(true);
       const data = await pagesAPI.get(pageId!);
-      setPage(data as any);
+      setPage(data);
       setContent(data.content as PageContent);
       setTitle(data.title);
       setSlug(data.slug);
@@ -72,37 +143,46 @@ export default function PageEditor() {
     }
   };
 
-  const handleSave = async () => {
-    if (!page || !content) return;
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    setPendingChanges((prev) => ({ ...prev, title: true }));
+    saveManager.markUnsaved();
+  };
 
-    try {
-      setSaving(true);
-      await pagesAPI.update(page.id, {
-        title,
-        content,
-        theme,
-      });
-      setSaved(true);
-      alert("Success: Page saved");
-    } catch (error: any) {
-      alert(`Error: ${error.message || "Failed to save page"}`);
-    } finally {
-      setSaving(false);
-    }
+  const handleContentChange = (newContent: PageContent) => {
+    setContent(newContent);
+    setPendingChanges((prev) => ({ ...prev, content: true }));
+    saveManager.markUnsaved();
+  };
+
+  const handleThemeChange = (newTheme: ThemeName) => {
+    setTheme(newTheme);
+    setPendingChanges((prev) => ({ ...prev, theme: true }));
+    saveManager.markUnsaved();
   };
 
   const handlePublish = async () => {
     if (!page) return;
 
+    // Save unsaved changes first
+    if (Object.values(pendingChanges).some((v) => v)) {
+      const shouldSaveFirst = window.confirm(
+        "You have unsaved changes. Would you like to save them before publishing?"
+      );
+      if (shouldSaveFirst) {
+        await saveManager.save();
+        if (Object.values(pendingChanges).some((v) => v)) {
+          return; // Save failed
+        }
+      }
+    }
+
     try {
-      setSaving(true);
-      await pagesAPI.publish(page.id);
-      setPage({ ...page, status: "published" });
-      alert("Success: Page published");
+      const updated = await pagesAPI.publish(page.id);
+      setPage(updated);
+      alert("Success: Page published 🚀");
     } catch (error: any) {
       alert(`Error: ${error.message || "Failed to publish page"}`);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -110,14 +190,11 @@ export default function PageEditor() {
     if (!page) return;
 
     try {
-      setSaving(true);
-      await pagesAPI.unpublish(page.id);
-      setPage({ ...page, status: "draft" });
+      const updated = await pagesAPI.unpublish(page.id);
+      setPage(updated);
       alert("Success: Page unpublished");
     } catch (error: any) {
       alert(`Error: ${error.message || "Failed to unpublish page"}`);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -142,56 +219,105 @@ export default function PageEditor() {
     );
   }
 
+  const isPublishDisabled = Object.values(pendingChanges).some((v) => v) || saveManager.isSaving;
+
   return (
     <Box minH="100vh" bg="gray.50">
       {/* Top Bar */}
-      <Box bg="white" borderBottom="1px solid" borderColor="gray.200" py={4} px={6}>
+      <Box bg="white" borderBottom="1px solid" borderColor="gray.200" py={4} px={6} boxShadow="sm">
         <Container maxW="100%" px={0}>
-          <HStack justify="space-between" align="center">
-            <VStack align="start" gap={1}>
-              <Heading size="md">{title}</Heading>
-              <HStack gap={2}>
-                <Badge colorScheme={page.status === "published" ? "green" : "gray"}>
-                  {page.status === "published" ? "Published" : "Draft"}
-                </Badge>
-                <Text fontSize="sm" color="gray.600">
-                  {saved ? "Saved" : "Unsaved changes"}
-                </Text>
-              </HStack>
-            </VStack>
-            <HStack gap={2}>
-              <Button
-                variant="outline"
-                onClick={() => navigate("/app")}
-              >
-                Back to Dashboard
-              </Button>
-              <Button
-                colorScheme="purple"
-                onClick={handleSave}
-                loading={saving}
-              >
-                Save
-              </Button>
-              {page.status === "draft" ? (
-                <Button
-                  colorScheme="green"
-                  onClick={handlePublish}
-                  loading={saving}
-                >
-                  Publish
-                </Button>
-              ) : (
-                <Button
-                  colorScheme="orange"
-                  onClick={handleUnpublish}
-                  loading={saving}
-                >
-                  Unpublish
-                </Button>
-              )}
+          <VStack gap={4} align="stretch">
+            {/* Row 1: Title and Status */}
+            <HStack justify="space-between" align="start">
+              <VStack align="start" gap={2} flex={1}>
+                <Heading size="md" color="gray.900">
+                  {title || "Untitled Page"}
+                </Heading>
+                <HStack gap={2} flexWrap="wrap">
+                  <Badge 
+                    colorScheme={page.status === "published" ? "green" : "gray"}
+                    fontSize="xs"
+                    px={2}
+                    py={1}
+                  >
+                    {page.status === "published" ? "Published" : "Draft"}
+                  </Badge>
+                  <Text fontSize="xs" color="gray.500">
+                    /{slug}
+                  </Text>
+                </HStack>
+              </VStack>
+
+              {/* Save Status - Right aligned */}
+              <Box minW="fit-content">
+                <SaveStatus
+                  isSaving={saveManager.isSaving}
+                  hasUnsavedChanges={saveManager.hasUnsavedChanges}
+                  lastSavedAt={saveManager.lastSavedAt}
+                  error={saveManager.error}
+                />
+              </Box>
             </HStack>
-          </HStack>
+
+            {/* Row 2: Controls */}
+            <HStack justify="space-between" align="center">
+              <HStack gap={2}>
+                <Button
+                  variant={autoSaveEnabled ? "solid" : "outline"}
+                  size="sm"
+                  onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
+                  colorScheme={autoSaveEnabled ? "blue" : "gray"}
+                  fontSize="xs"
+                >
+                  Auto-save: {autoSaveEnabled ? "ON" : "OFF"}
+                </Button>
+              </HStack>
+
+              <HStack gap={2}>
+                <Button
+                  variant="outline"
+                  colorScheme="gray"
+                  size="sm"
+                  onClick={() => {
+                    if (confirmNavigation()) {
+                      navigate("/app");
+                    }
+                  }}
+                >
+                  Back
+                </Button>
+                <Button
+                  colorScheme="blue"
+                  size="sm"
+                  onClick={() => saveManager.save()}
+                  loading={saveManager.isSaving}
+                  disabled={!saveManager.hasUnsavedChanges || saveManager.isSaving}
+                >
+                  Save
+                </Button>
+                {page.status === "draft" ? (
+                  <Button
+                    colorScheme="cyan"
+                    size="sm"
+                    onClick={handlePublish}
+                    disabled={isPublishDisabled}
+                    loading={saveManager.isSaving}
+                  >
+                    Publish
+                  </Button>
+                ) : (
+                  <Button
+                    colorScheme="orange"
+                    size="sm"
+                    onClick={handleUnpublish}
+                    loading={saveManager.isSaving}
+                  >
+                    Unpublish
+                  </Button>
+                )}
+              </HStack>
+            </HStack>
+          </VStack>
         </Container>
       </Box>
 
@@ -200,7 +326,7 @@ export default function PageEditor() {
         <Grid
           templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
           gap={0}
-          minH="calc(100vh - 120px)"
+          minH="calc(100vh - 180px)"
         >
           {/* Left: Editor */}
           <Box
@@ -213,64 +339,56 @@ export default function PageEditor() {
             <VStack gap={8} align="stretch">
               {/* Page Settings */}
               <VStack gap={4} align="stretch">
-                <Text fontWeight="bold" fontSize="lg">
+                <Text fontWeight="bold" fontSize="lg" color="gray.900">
                   Page Settings
                 </Text>
                 <Input
                   placeholder="Page Title"
                   value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    setSaved(false);
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  size="md"
+                  bg="gray.50"
+                  borderColor="gray.300"
+                  _focus={{
+                    bg: "white",
+                    borderColor: "blue.500",
+                    boxShadow: "0 0 0 1px blue.500",
                   }}
                 />
                 <Input
                   placeholder="Slug"
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
                   disabled
                   fontSize="sm"
                   color="gray.500"
+                  bg="gray.100"
+                  borderColor="gray.300"
                 />
-                <select
-                  value={theme}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    setTheme(e.target.value as ThemeName);
-                    setSaved(false);
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "4px",
-                    border: "1px solid #e2e8f0",
-                    fontSize: "14px",
-                  }}
-                >
-                  {Object.entries(THEMES).map(([key, t]) => (
-                    <option key={key} value={key}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
               </VStack>
 
+              {/* Theme Selector */}
+              <ThemeSelector
+                value={theme}
+                onChange={handleThemeChange}
+              />
+
               {/* Section Editors */}
-              <HeroEditor content={content} onChange={(c) => {
-                setContent(c);
-                setSaved(false);
-              }} />
-              <FeaturesEditor content={content} onChange={(c) => {
-                setContent(c);
-                setSaved(false);
-              }} />
-              <GalleryEditor content={content} onChange={(c) => {
-                setContent(c);
-                setSaved(false);
-              }} />
-              <ContactEditor content={content} onChange={(c) => {
-                setContent(c);
-                setSaved(false);
-              }} />
+              <HeroEditor
+                content={content}
+                onChange={handleContentChange}
+              />
+              <FeaturesEditor
+                content={content}
+                onChange={handleContentChange}
+              />
+              <GalleryEditor
+                content={content}
+                onChange={handleContentChange}
+              />
+              <ContactEditor
+                content={content}
+                onChange={handleContentChange}
+              />
             </VStack>
           </Box>
 

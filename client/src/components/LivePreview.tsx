@@ -1,14 +1,26 @@
-import { Box, VStack, Button, Text, Image, Input } from "@chakra-ui/react";
+import { Box, VStack, Button, Text, Image, Input, Spinner } from "@chakra-ui/react";
+import { useState } from "react";
 import type { PageContent } from "../types/page";
 import type { Theme } from "../theme/themes";
+import { getThemePreviewStyles } from "../theme/utils";
 
 interface LivePreviewProps {
   content: PageContent;
   theme: Theme;
   device: "desktop" | "tablet" | "mobile";
+  onContactSubmit?: (data: {
+    name?: string;
+    email?: string;
+    message?: string;
+  }) => Promise<boolean>;
 }
 
-export function LivePreview({ content, theme, device }: LivePreviewProps) {
+export function LivePreview({
+  content,
+  theme,
+  device,
+  onContactSubmit,
+}: LivePreviewProps) {
   const getWidth = () => {
     switch (device) {
       case "mobile":
@@ -20,26 +32,12 @@ export function LivePreview({ content, theme, device }: LivePreviewProps) {
     }
   };
 
-  const previewStyles = {
-    "--color-primary": theme.colors.primary,
-    "--color-secondary": theme.colors.secondary,
-    "--color-accent": theme.colors.accent,
-    "--color-background": theme.colors.background,
-    "--color-text": theme.colors.text,
-    "--color-text-light": theme.colors.textLight,
-    "--color-border": theme.colors.border,
-    "--font-family": theme.typography.fontFamily,
-    "--heading-size": theme.typography.headingSize,
-    "--body-size": theme.typography.bodySize,
-  } as React.CSSProperties;
+  const previewStyles = getThemePreviewStyles(theme);
 
   return (
     <Box
       width={getWidth()}
       mx="auto"
-      bg={theme.colors.background}
-      color={theme.colors.text}
-      fontFamily={theme.typography.fontFamily}
       style={previewStyles}
       borderRadius="lg"
       overflow="hidden"
@@ -48,87 +46,143 @@ export function LivePreview({ content, theme, device }: LivePreviewProps) {
       <VStack gap={0} align="stretch">
         {/* Hero Section */}
         <Box
-          bg={theme.colors.primary}
-          color={theme.colors.secondary}
-          py={16}
-          px={8}
-          textAlign="center"
+          className="hero-section"
+          style={{
+            backgroundColor: theme.colors.primary,
+            color: theme.colors.secondary,
+            padding: `calc(${theme.ui.spacing} * 4)`,
+            fontFamily: theme.typography.fontFamily,
+          }}
         >
           <Text
             as="h1"
             fontSize={theme.typography.headingSize}
-            fontWeight="bold"
+            fontWeight={theme.typography.fontWeight}
             mb={4}
+            style={{
+              fontFamily: theme.typography.fontFamily,
+              color: theme.colors.secondary,
+            }}
           >
             {content.hero.title}
           </Text>
-          <Text fontSize="lg" mb={8} color={theme.colors.accent}>
+          <Text
+            fontSize="lg"
+            mb={8}
+            style={{
+              color: theme.colors.accent,
+              fontFamily: theme.typography.fontFamily,
+            }}
+          >
             {content.hero.subtitle}
           </Text>
           <Button
-            bg={theme.colors.accent}
-            color={theme.colors.primary}
-            _hover={{ opacity: 0.8 }}
-            size="lg"
+            className={`btn btn-${theme.ui.buttonStyle}`}
+            style={{
+              backgroundColor: theme.colors.accent,
+              color: theme.colors.primary,
+              fontFamily: theme.typography.fontFamily,
+              borderRadius: theme.ui.borderRadius,
+              padding: `calc(${theme.ui.spacing} * 0.75) calc(${theme.ui.spacing} * 1.5)`,
+              fontWeight: "bold",
+              cursor: "pointer",
+              border: "none",
+              transition: "all 250ms ease-in-out",
+            }}
           >
             {content.hero.buttonText}
           </Button>
         </Box>
 
         {/* Features Section */}
-        <Box py={16} px={8}>
-          <Text
-            as="h2"
-            fontSize="2xl"
-            fontWeight="bold"
-            mb={12}
-            textAlign="center"
-            color={theme.colors.primary}
-          >
-            Features
-          </Text>
+        {content.features.items.length > 0 && (
           <Box
-            display="grid"
-            gridTemplateColumns={{
-              base: "1fr",
-              md: "repeat(2, 1fr)",
-              lg: "repeat(3, 1fr)",
+            className="section"
+            style={{
+              padding: `calc(${theme.ui.spacing} * 4)`,
+              backgroundColor: theme.colors.background,
             }}
-            gap={8}
           >
-            {content.features.items.map((feature, idx) => (
-              <Box
-                key={idx}
-                p={6}
-                border="1px solid"
-                borderColor={theme.colors.border}
-                borderRadius="lg"
-              >
-                <Text
-                  as="h3"
-                  fontSize="lg"
-                  fontWeight="bold"
-                  mb={2}
-                  color={theme.colors.primary}
-                >
-                  {feature.title}
-                </Text>
-                <Text color={theme.colors.textLight}>{feature.description}</Text>
-              </Box>
-            ))}
-          </Box>
-        </Box>
-
-        {/* Gallery Section */}
-        {content.gallery.images.length > 0 && (
-          <Box py={16} px={8} bg={theme.colors.secondary}>
             <Text
               as="h2"
               fontSize="2xl"
               fontWeight="bold"
               mb={12}
               textAlign="center"
-              color={theme.colors.primary}
+              style={{
+                color: theme.colors.primary,
+                fontFamily: theme.typography.fontFamily,
+              }}
+            >
+              Features
+            </Text>
+            <Box
+              display="grid"
+              gridTemplateColumns={{
+                base: "1fr",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(3, 1fr)",
+              }}
+              gap={8}
+            >
+              {content.features.items.map((feature, idx) => (
+                <Box
+                  key={idx}
+                  className="card fade-in-up"
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    border: `1px solid ${theme.colors.border}`,
+                    borderRadius: theme.ui.borderRadius,
+                    padding: theme.ui.spacing,
+                    transition: "all 250ms ease-in-out",
+                  }}
+                >
+                  <Text
+                    as="h3"
+                    fontSize="lg"
+                    fontWeight="bold"
+                    mb={2}
+                    style={{
+                      color: theme.colors.primary,
+                      fontFamily: theme.typography.fontFamily,
+                    }}
+                  >
+                    {feature.title}
+                  </Text>
+                  <Text
+                    style={{
+                      color: theme.colors.textLight,
+                      fontFamily: theme.typography.fontFamily,
+                      fontSize: theme.typography.bodySize,
+                    }}
+                  >
+                    {feature.description}
+                  </Text>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Gallery Section */}
+        {content.gallery.images.length > 0 && (
+          <Box
+            className="section section-alt"
+            style={{
+              padding: `calc(${theme.ui.spacing} * 4)`,
+              backgroundColor: theme.colors.surface,
+            }}
+          >
+            <Text
+              as="h2"
+              fontSize="2xl"
+              fontWeight="bold"
+              mb={12}
+              textAlign="center"
+              style={{
+                color: theme.colors.primary,
+                fontFamily: theme.typography.fontFamily,
+              }}
             >
               Gallery
             </Text>
@@ -142,21 +196,13 @@ export function LivePreview({ content, theme, device }: LivePreviewProps) {
               gap={6}
             >
               {content.gallery.images.map((image, idx) => (
-                <Box
+                <GalleryImage
                   key={idx}
-                  aspectRatio="1"
-                  overflow="hidden"
-                  borderRadius="lg"
-                  bg="gray.200"
-                >
-                  <Image
-                    src={image}
-                    alt={`Gallery ${idx + 1}`}
-                    width="100%"
-                    height="100%"
-                    objectFit="cover"
-                  />
-                </Box>
+                  src={image}
+                  alt={`Gallery ${idx + 1}`}
+                  borderRadius={theme.ui.borderRadius}
+                  borderColor={theme.colors.border}
+                />
               ))}
             </Box>
           </Box>
@@ -164,60 +210,276 @@ export function LivePreview({ content, theme, device }: LivePreviewProps) {
 
         {/* Contact Section */}
         {content.contact.enabled && (
-          <Box py={16} px={8}>
+          <Box
+            className="section"
+            style={{
+              padding: `calc(${theme.ui.spacing} * 4)`,
+              backgroundColor: theme.colors.background,
+            }}
+          >
             <Text
               as="h2"
               fontSize="2xl"
               fontWeight="bold"
               mb={8}
               textAlign="center"
-              color={theme.colors.primary}
+              style={{
+                color: theme.colors.primary,
+                fontFamily: theme.typography.fontFamily,
+              }}
             >
               Get In Touch
             </Text>
-            <VStack
-              gap={4}
-              maxW="500px"
-              mx="auto"
-              as="form"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              {content.contact.fields.name && (
-                <Input
-                  placeholder="Your Name"
-                  borderColor={theme.colors.border}
-                  _focus={{ borderColor: theme.colors.accent }}
-                />
-              )}
-              {content.contact.fields.email && (
-                <Input
-                  placeholder="Your Email"
-                  type="email"
-                  borderColor={theme.colors.border}
-                  _focus={{ borderColor: theme.colors.accent }}
-                />
-              )}
-              {content.contact.fields.message && (
-                <Input
-                  placeholder="Your Message"
-                  as="textarea"
-                  minH="120px"
-                  borderColor={theme.colors.border}
-                  _focus={{ borderColor: theme.colors.accent }}
-                />
-              )}
-              <Button
-                width="full"
-                bg={theme.colors.accent}
-                color={theme.colors.primary}
-                _hover={{ opacity: 0.8 }}
-              >
-                Send Message
-              </Button>
-            </VStack>
+            <ContactForm
+              content={content}
+              theme={theme}
+              onSubmit={onContactSubmit}
+            />
           </Box>
         )}
       </VStack>
     </Box>
+  );
+}
+
+function GalleryImage({
+  src,
+  alt,
+  borderRadius,
+  borderColor,
+}: {
+  src: string;
+  alt: string;
+  borderRadius: string;
+  borderColor: string;
+}) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoading(false);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageError(false);
+  };
+
+  return (
+    <Box
+      aspectRatio="1"
+      overflow="hidden"
+      style={{ borderRadius }}
+      bg="gray.200"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      position="relative"
+      border={`1px solid ${borderColor}`}
+    >
+      {imageError ? (
+        <VStack gap={2} color="gray.500" textAlign="center" p={4}>
+          <Text fontSize="2xl">📷</Text>
+          <Text fontSize="sm">Image failed to load</Text>
+        </VStack>
+      ) : (
+        <>
+          {imageLoading && (
+            <Box
+              position="absolute"
+              inset={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              bg="gray.100"
+            >
+              <Text color="gray.500">Loading...</Text>
+            </Box>
+          )}
+          <Image
+            src={src}
+            alt={alt}
+            width="100%"
+            height="100%"
+            objectFit="cover"
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+            style={{ opacity: imageLoading ? 0 : 1 }}
+          />
+        </>
+      )}
+    </Box>
+  );
+}
+
+function ContactForm({
+  content,
+  theme,
+  onSubmit,
+}: {
+  content: PageContent;
+  theme: Theme;
+  onSubmit?: (data: {
+    name?: string;
+    email?: string;
+    message?: string;
+  }) => Promise<boolean>;
+}) {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const hasAnyField =
+    content.contact.fields.name ||
+    content.contact.fields.email ||
+    content.contact.fields.message;
+
+  if (!hasAnyField) {
+    return (
+      <Box textAlign="center" py={8}>
+        <Text
+          style={{
+            color: theme.colors.textLight,
+            fontFamily: theme.typography.fontFamily,
+          }}
+        >
+          Contact form is enabled but no fields are selected.
+        </Text>
+      </Box>
+    );
+  }
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setSubmitError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError(null);
+
+    if (!onSubmit) return;
+
+    setIsSubmitting(true);
+    try {
+      const success = await onSubmit(formData);
+      if (success) {
+        setFormData({ name: "", email: "", message: "" });
+      }
+    } catch (err) {
+      setSubmitError("Failed to submit form. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <VStack
+      gap={4}
+      maxW="500px"
+      mx="auto"
+      as="form"
+      onSubmit={handleSubmit}
+    >
+      {content.contact.fields.name && (
+        <Input
+          name="name"
+          placeholder="Your Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="form-input"
+          style={{
+            borderColor: theme.colors.border,
+            color: theme.colors.text,
+            fontFamily: theme.typography.fontFamily,
+            borderRadius: theme.ui.borderRadius,
+            backgroundColor: theme.colors.background,
+            padding: "8px 12px",
+            border: `1px solid ${theme.colors.border}`,
+          }}
+          disabled={isSubmitting}
+        />
+      )}
+      {content.contact.fields.email && (
+        <Input
+          name="email"
+          placeholder="Your Email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="form-input"
+          style={{
+            borderColor: theme.colors.border,
+            color: theme.colors.text,
+            fontFamily: theme.typography.fontFamily,
+            borderRadius: theme.ui.borderRadius,
+            backgroundColor: theme.colors.background,
+            padding: "8px 12px",
+            border: `1px solid ${theme.colors.border}`,
+          }}
+          disabled={isSubmitting}
+        />
+      )}
+      {content.contact.fields.message && (
+        <Input
+          name="message"
+          placeholder="Your Message"
+          as="textarea"
+          minH="120px"
+          value={formData.message}
+          onChange={handleChange}
+          className="form-textarea"
+          style={{
+            borderColor: theme.colors.border,
+            color: theme.colors.text,
+            fontFamily: theme.typography.fontFamily,
+            borderRadius: theme.ui.borderRadius,
+            backgroundColor: theme.colors.background,
+            padding: "8px 12px",
+            border: `1px solid ${theme.colors.border}`,
+          }}
+          disabled={isSubmitting}
+        />
+      )}
+      {submitError && (
+        <Text color="red.500" fontSize="sm">
+          {submitError}
+        </Text>
+      )}
+      <Button
+        width="full"
+        className={`btn btn-${theme.ui.buttonStyle}`}
+        style={{
+          backgroundColor: theme.colors.accent,
+          color: theme.colors.primary,
+          fontFamily: theme.typography.fontFamily,
+          borderRadius: theme.ui.borderRadius,
+          padding: "10px 20px",
+          fontWeight: "bold",
+          cursor: "pointer",
+          border: "none",
+          transition: "all 250ms ease-in-out",
+        }}
+        type="submit"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <Spinner size="sm" mr={2} />
+            Sending...
+          </>
+        ) : (
+          "Send Message"
+        )}
+      </Button>
+    </VStack>
   );
 }

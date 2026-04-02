@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -25,10 +25,32 @@ export function CreatePageDialog({
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [slug, setSlug] = useState("");
+
+  const MAX_TITLE_LENGTH = 100;
+
+  // Generate slug from title
+  useEffect(() => {
+    const generatedSlug = title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .substring(0, 50); // Limit slug length
+    setSlug(generatedSlug || "untitled-page");
+  }, [title]);
 
   const handleCreate = async () => {
-    if (!title.trim()) {
+    const trimmedTitle = title.trim();
+    
+    if (!trimmedTitle) {
       setError("Page title is required");
+      return;
+    }
+
+    if (trimmedTitle.length > MAX_TITLE_LENGTH) {
+      setError(`Title must be ${MAX_TITLE_LENGTH} characters or less`);
       return;
     }
 
@@ -39,12 +61,13 @@ export function CreatePageDialog({
       const newPage = await pagesAPI.create();
       
       // If title is provided, update the page
-      if (title.trim() !== "Untitled Page") {
-        await pagesAPI.update(newPage.id, { title: title.trim() });
+      if (trimmedTitle !== "Untitled Page") {
+        await pagesAPI.update(newPage.id, { title: trimmedTitle });
       }
 
       onSuccess(newPage.id);
       setTitle("");
+      setSlug("");
       onClose();
     } catch (err: any) {
       setError(err.message || "Failed to create page");
@@ -55,6 +78,7 @@ export function CreatePageDialog({
 
   const handleClose = () => {
     setTitle("");
+    setSlug("");
     setError("");
     onClose();
   };
@@ -71,21 +95,37 @@ export function CreatePageDialog({
             </Text>
 
             <Stack gap={2} width="full">
-              <Input
-                placeholder="e.g., My Portfolio, Product Launch..."
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  setError("");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !loading) {
-                    handleCreate();
-                  }
-                }}
-                disabled={loading}
-                autoFocus
-              />
+              <VStack gap={1} align="stretch">
+                <Input
+                  placeholder="e.g., My Portfolio, Product Launch..."
+                  value={title}
+                  onChange={(e) => {
+                    const newTitle = e.target.value;
+                    if (newTitle.length <= MAX_TITLE_LENGTH) {
+                      setTitle(newTitle);
+                      setError("");
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !loading) {
+                      handleCreate();
+                    }
+                  }}
+                  disabled={loading}
+                  autoFocus
+                />
+                <HStack justify="space-between">
+                  <Text fontSize="xs" color="gray.500">
+                    Slug: /{slug}
+                  </Text>
+                  <Text 
+                    fontSize="xs" 
+                    color={title.length > MAX_TITLE_LENGTH * 0.8 ? "orange.500" : "gray.500"}
+                  >
+                    {title.length}/{MAX_TITLE_LENGTH}
+                  </Text>
+                </HStack>
+              </VStack>
               {error && (
                 <Text color="red.600" fontSize="sm">
                   {error}

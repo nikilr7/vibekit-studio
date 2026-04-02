@@ -239,6 +239,22 @@ export default function Dashboard() {
                         Edit
                       </Button>
 
+                      {page.status === "published" && (
+                        <Button
+                          size="sm"
+                          colorScheme="blue"
+                          variant="outline"
+                          onClick={() => {
+                            const url = `${window.location.origin}/p/${page.slug}`;
+                            navigator.clipboard.writeText(url);
+                            alert("Page URL copied to clipboard!");
+                          }}
+                          h="44px"
+                        >
+                          Share
+                        </Button>
+                      )}
+
                       <MenuRoot>
                         <MenuTrigger asChild>
                           <IconButton
@@ -251,6 +267,14 @@ export default function Dashboard() {
                           </IconButton>
                         </MenuTrigger>
                         <MenuContent>
+                          {page.status === "published" && (
+                            <MenuItem
+                              value="view"
+                              onClick={() => window.open(`/p/${page.slug}`, '_blank')}
+                            >
+                              View Public Page
+                            </MenuItem>
+                          )}
                           {page.status === "draft" ? (
                             <MenuItem
                               value="publish"

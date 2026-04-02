@@ -1,4 +1,5 @@
 import { Box, Button, Input, VStack, HStack, Text, IconButton } from "@chakra-ui/react";
+import { useState } from "react";
 import type { PageContent } from "../types/page";
 
 interface SectionEditorsProps {
@@ -118,9 +119,33 @@ export function FeaturesEditor({ content, onChange }: SectionEditorsProps) {
 }
 
 export function GalleryEditor({ content, onChange }: SectionEditorsProps) {
+  const [urlErrors, setUrlErrors] = useState<{ [key: number]: string }>({});
+
+  const validateUrl = (url: string): string | null => {
+    if (!url.trim()) return null;
+    
+    try {
+      new URL(url);
+      if (!url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+        return "URL should point to an image file";
+      }
+      return null;
+    } catch {
+      return "Please enter a valid URL";
+    }
+  };
+
   const updateImage = (idx: number, value: string) => {
     const images = [...content.gallery.images];
     images[idx] = value;
+    
+    // Validate URL
+    const error = validateUrl(value);
+    setUrlErrors(prev => ({
+      ...prev,
+      [idx]: error || ""
+    }));
+    
     onChange({
       ...content,
       gallery: { images },
@@ -171,12 +196,47 @@ export function GalleryEditor({ content, onChange }: SectionEditorsProps) {
               ✕
             </IconButton>
           </HStack>
-          <Input
-            placeholder="Image URL"
-            value={image}
-            onChange={(e) => updateImage(idx, e.target.value)}
-            size="sm"
-          />
+          <VStack gap={2} align="stretch">
+            <Input
+              placeholder="Image URL (e.g., https://example.com/image.jpg)"
+              value={image}
+              onChange={(e) => updateImage(idx, e.target.value)}
+              size="sm"
+              borderColor={urlErrors[idx] ? "red.300" : "gray.200"}
+            />
+            {urlErrors[idx] && (
+              <Text color="red.500" fontSize="xs">
+                {urlErrors[idx]}
+              </Text>
+            )}
+            {image && !urlErrors[idx] && (
+              <Box
+                w="100px"
+                h="100px"
+                borderRadius="md"
+                overflow="hidden"
+                bg="gray.100"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <img
+                  src={image}
+                  alt="Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover"
+                  }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                    (e.target as HTMLImageElement).nextElementSibling!.textContent = "❌ Invalid image";
+                  }}
+                />
+                <Text fontSize="xs" color="gray.500" display="none"></Text>
+              </Box>
+            )}
+          </VStack>
         </Box>
       ))}
     </VStack>
