@@ -38,9 +38,10 @@ export const handler = async (event: any) => {
     return {
       statusCode: 200,
       headers: {
-        "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=86400`,
+        "Content-Type": "application/json",
+        "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax`,
       },
-      body: JSON.stringify({ message: "Login successful" }),
+      body: JSON.stringify({ message: "Login successful", token }),
     };
   } catch (error: any) {
     return {

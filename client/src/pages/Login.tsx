@@ -50,14 +50,19 @@ export default function Login() {
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
+      
       const data = await res.json();
-      if (res.ok) {
-        if (data.token) localStorage.setItem("token", data.token);
-        navigate("/dashboard");
+      
+      if (res.ok && data.token) {
+        // Store JWT token in localStorage
+        localStorage.setItem("token", data.token);
+        // Small delay to ensure state is updated
+        setTimeout(() => navigate("/app"), 100);
       } else {
         showToast("Login failed", data.message || "Invalid credentials");
       }
-    } catch {
+    } catch (error) {
+      console.error("Login error:", error);
       showToast("Error", "Something went wrong. Try again.");
     } finally {
       setLoading(false);
