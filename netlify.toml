@@ -5,13 +5,6 @@
   functions = "../netlify/functions"
   publish = "dist"
 
-# Public page route - rewrite to function
-[[redirects]]
-  from = "/p/:slug"
-  to = "/.netlify/functions/pages-public?slug=:slug"
-  status = 200
-  force = true
-
 # Function redirects
 [[redirects]]
   from = "/.netlify/functions/login"
