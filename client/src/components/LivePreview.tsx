@@ -51,28 +51,32 @@ export function LivePreview({
           style={{
             backgroundColor: theme.colors.primary,
             color: theme.colors.secondary,
-            padding: `calc(${theme.ui.spacing} * 4)`,
+            padding: `calc(${theme.ui.spacing} * 2)`,
             fontFamily: theme.typography.fontFamily,
           }}
         >
           <Text
             as="h1"
-            fontSize={{ base: "1.75rem", md: "2.5rem", lg: theme.typography.headingSize }}
+            fontSize={{ base: "1.5rem", sm: "2rem", md: "2.5rem", lg: theme.typography.headingSize }}
             fontWeight={theme.typography.fontWeight}
-            mb={{ base: 3, md: 4 }}
+            mb={{ base: 2, md: 4 }}
             style={{
               fontFamily: theme.typography.fontFamily,
               color: theme.colors.secondary,
+              lineHeight: "1.2",
+              wordBreak: "break-word",
             }}
           >
             {content.hero.title}
           </Text>
           <Text
-            fontSize={{ base: "sm", md: "md", lg: "lg" }}
-            mb={{ base: 6, md: 8 }}
+            fontSize={{ base: "0.875rem", sm: "1rem", md: "md", lg: "lg" }}
+            mb={{ base: 4, md: 8 }}
             style={{
               color: theme.colors.accent,
               fontFamily: theme.typography.fontFamily,
+              lineHeight: "1.4",
+              wordBreak: "break-word",
             }}
           >
             {content.hero.subtitle}
