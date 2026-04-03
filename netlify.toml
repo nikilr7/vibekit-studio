@@ -2,23 +2,78 @@
 [build]
   base = "client"
   command = "npm run build"
-  functions = "netlify/functions"
+  functions = "../netlify/functions"
   publish = "dist"
 
 # API Redirects
 [[redirects]]
-  from = "/api/public/pages/:slug"
-  to = "/.netlify/functions/pages-public?slug=:slug"
+  from = "/.netlify/functions/login"
+  to = "/.netlify/functions/login"
   status = 200
 
 [[redirects]]
-  from = "/api/public/pages/:slug/view"
-  to = "/.netlify/functions/pages-view?slug=:slug"
+  from = "/.netlify/functions/auth"
+  to = "/.netlify/functions/auth"
   status = 200
 
 [[redirects]]
-  from = "/api/public/pages/:slug/contact"
-  to = "/.netlify/functions/pages-contact?slug=:slug"
+  from = "/.netlify/functions/pages"
+  to = "/.netlify/functions/pages"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-create"
+  to = "/.netlify/functions/pages-create"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-get"
+  to = "/.netlify/functions/pages-get"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-update"
+  to = "/.netlify/functions/pages-update"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-delete"
+  to = "/.netlify/functions/pages-delete"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-publish"
+  to = "/.netlify/functions/pages-publish"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-unpublish"
+  to = "/.netlify/functions/pages-unpublish"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-duplicate"
+  to = "/.netlify/functions/pages-duplicate"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-public"
+  to = "/.netlify/functions/pages-public"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-view"
+  to = "/.netlify/functions/pages-view"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-contact"
+  to = "/.netlify/functions/pages-contact"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/pages-submissions"
+  to = "/.netlify/functions/pages-submissions"
   status = 200
 
 # SPA Fallback - Handle all routes for React Router
