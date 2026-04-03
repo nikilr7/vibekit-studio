@@ -5,7 +5,13 @@
   functions = "../netlify/functions"
   publish = "dist"
 
-# API Redirects
+# Public page route - must come BEFORE SPA fallback
+[[redirects]]
+  from = "/p/:slug"
+  to = "/.netlify/functions/pages-public?slug=:slug"
+  status = 200
+
+# Function redirects
 [[redirects]]
   from = "/.netlify/functions/login"
   to = "/.netlify/functions/login"
@@ -76,7 +82,7 @@
   to = "/.netlify/functions/pages-submissions"
   status = 200
 
-# SPA Fallback - Handle all routes for React Router
+# SPA Fallback - Handle all routes for React Router (MUST BE LAST)
 [[redirects]]
   from = "/*"
   to = "/index.html"
