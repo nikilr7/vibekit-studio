@@ -6,9 +6,18 @@ export const handler = async (event: any) => {
     console.log("=== Pages Public Request ===");
     console.log("Path:", event.path);
     console.log("Query params:", event.queryStringParameters);
+    console.log("Raw path:", event.rawPath);
 
     // Extract slug from query parameters (from redirect)
-    const slug = event.queryStringParameters?.slug;
+    let slug = event.queryStringParameters?.slug;
+
+    // Fallback: extract from path if not in query params
+    if (!slug && event.path) {
+      const match = event.path.match(/\/p\/([^/]+)/);
+      if (match) {
+        slug = match[1];
+      }
+    }
 
     console.log("Slug:", slug);
 
