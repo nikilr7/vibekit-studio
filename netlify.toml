@@ -2,7 +2,7 @@
 [build]
   base = "client"
   command = "npm run build"
-  functions = "../netlify/functions"
+  functions = "netlify/functions"
   publish = "dist"
 
 # API Redirects
@@ -21,7 +21,7 @@
   to = "/.netlify/functions/pages-contact?slug=:slug"
   status = 200
 
-# SPA Fallback
+# SPA Fallback - Handle all routes for React Router
 [[redirects]]
   from = "/*"
   to = "/index.html"

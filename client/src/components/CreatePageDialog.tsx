@@ -90,7 +90,7 @@ export function CreatePageDialog({
         <Dialog.Header>Create New Page</Dialog.Header>
         <Dialog.Body>
           <VStack gap={4}>
-            <Text color="gray.600" fontSize="sm">
+            <Text style={{ color: "rgba(232,232,240,0.45)" }} fontSize="sm">
               Give your page a title. You can change it anytime in the editor.
             </Text>
 
@@ -115,12 +115,12 @@ export function CreatePageDialog({
                   autoFocus
                 />
                 <HStack justify="space-between">
-                  <Text fontSize="xs" color="gray.500">
+                  <Text fontSize="xs" style={{ color: "rgba(255,255,255,0.4)" }}>
                     Slug: /{slug}
                   </Text>
                   <Text 
                     fontSize="xs" 
-                    color={title.length > MAX_TITLE_LENGTH * 0.8 ? "orange.500" : "gray.500"}
+                    style={{ color: title.length > MAX_TITLE_LENGTH * 0.8 ? "#f97316" : "rgba(255,255,255,0.4)" }}
                   >
                     {title.length}/{MAX_TITLE_LENGTH}
                   </Text>
@@ -140,6 +140,11 @@ export function CreatePageDialog({
               variant="outline"
               onClick={handleClose}
               disabled={loading}
+              style={{
+                borderColor: "rgba(255,255,255,0.2)",
+                color: "rgba(255,255,255,0.8)",
+                backgroundColor: "rgba(255,255,255,0.04)"
+              }}
             >
               Cancel
             </Button>
