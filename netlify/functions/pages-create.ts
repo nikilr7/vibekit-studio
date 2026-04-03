@@ -10,14 +10,14 @@ function generateSlug(title: string): string {
     .replace(/-+/g, "-");
 }
 
-async function getUniqueSlug(baseSlug: string, userId: string): Promise<string> {
+async function getUniqueSlug(baseSlug: string): Promise<string> {
   let slug = baseSlug;
   let counter = 2;
 
   while (true) {
     const result = await pool.query(
-      "SELECT id FROM pages WHERE slug = $1 AND user_id = $2",
-      [slug, userId]
+      "SELECT id FROM pages WHERE slug = $1",
+      [slug]
     );
 
     if (result.rows.length === 0) break;
@@ -90,7 +90,7 @@ export const handler = async (event: any) => {
       return errorResponse(401, "Unauthorized");
     }
 
-    const slug = await getUniqueSlug("untitled-page", userId);
+    const slug = await getUniqueSlug("untitled-page");
 
     const result = await pool.query(
       `INSERT INTO pages (user_id, title, content, status, theme, slug, created_at, updated_at)
