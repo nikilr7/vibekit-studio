@@ -44,7 +44,7 @@ export default function PublicPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/public/pages/${slug}`);
+      const response = await fetch(`/.netlify/functions/pages-public?slug=${slug}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -78,7 +78,7 @@ export default function PublicPage() {
 
       console.log("Tracking page view for slug:", slug);
 
-      const response = await fetch(`/api/public/pages/${slug}/view`, {
+      const response = await fetch(`/.netlify/functions/pages-view?slug=${slug}`, {
         method: "POST",
       });
 
@@ -134,7 +134,7 @@ export default function PublicPage() {
         device="desktop"
         onContactSubmit={async (data) => {
           try {
-            const response = await fetch(`/api/public/pages/${slug}/contact`, {
+            const response = await fetch(`/.netlify/functions/pages-contact?slug=${slug}`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(data),
