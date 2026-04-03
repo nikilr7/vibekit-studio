@@ -105,10 +105,19 @@ export function Messages({ pageId }: MessagesProps) {
   return (
     <VStack gap={0} align="stretch">
       <HStack justify="space-between" mb={4}>
-        <Text fontSize="lg" fontWeight="bold">
+        <Text fontSize="lg" fontWeight="bold" style={{ color: "rgba(255,255,255,0.9)" }}>
           Messages ({submissions.length})
         </Text>
-        <Button size="sm" colorScheme="blue" variant="outline" onClick={loadSubmissions}>
+        <Button
+          size="sm"
+          style={{
+            backgroundColor: "rgba(99,102,241,0.12)",
+            borderColor: "rgba(99,102,241,0.25)",
+            color: "#a5b4fc",
+            border: "1px solid",
+          }}
+          onClick={loadSubmissions}
+        >
           Refresh
         </Button>
       </HStack>
@@ -121,32 +130,34 @@ export function Messages({ pageId }: MessagesProps) {
             border="1px solid"
             borderColor="gray.200"
             borderRadius="md"
-            p={4}
+            p={{ base: 3, sm: 4 }}
             cursor="pointer"
             _hover={{ bg: "gray.50", borderColor: "gray.300" }}
             onClick={() => setSelectedMessage(submission)}
           >
-            <HStack justify="space-between" mb={2}>
-              <VStack align="start" gap={0}>
-                <Text fontWeight="bold" color="gray.900">
-                  {submission.name}
-                </Text>
-                <Text fontSize="sm" color="gray.600">
-                  {submission.email}
-                </Text>
-              </VStack>
-              <Badge colorScheme="blue" variant="subtle">
-                {formatDate(submission.created_at)}
-              </Badge>
-            </HStack>
-            <Text
-              fontSize="sm"
-              color="gray.700"
-              lineClamp={2}
-              mt={2}
-            >
-              {submission.message}
-            </Text>
+            <VStack align="start" gap={{ base: 2, sm: 3 }} w="full">
+              <HStack justify="space-between" w="full" gap={{ base: 1, sm: 2 }} flexWrap="wrap" alignItems="flex-start">
+                <VStack align="start" gap={0} minW="0" flex={1}>
+                  <Text fontWeight="bold" color="gray.900" fontSize={{ base: "sm", sm: "base" }}>
+                    {submission.name}
+                  </Text>
+                  <Text fontSize={{ base: "xs", sm: "sm" }} color="gray.600" truncate>
+                    {submission.email}
+                  </Text>
+                </VStack>
+                <Badge colorScheme="blue" variant="subtle" flexShrink={0} fontSize={{ base: "xs", sm: "sm" }} mt={{ base: 0.5, sm: 0 }}>
+                  {formatDate(submission.created_at)}
+                </Badge>
+              </HStack>
+              <Text
+                fontSize={{ base: "xs", sm: "sm" }}
+                color="gray.700"
+                lineClamp={2}
+                w="full"
+              >
+                {submission.message}
+              </Text>
+            </VStack>
           </Box>
         ))}
       </VStack>
